@@ -2,6 +2,8 @@
 
 A high-converting, fully responsive Next.js e-commerce frontend for selling pre-coordinated AI art collections. This application helps homeowners overcome decision paralysis by offering curated art sets designed to work harmoniously across multiple rooms.
 
+**🛒 Powered by Shopify** - All payment processing, checkout, and order management handled securely by Shopify. No backend code required!
+
 ## 🎯 Project Overview
 
 ### Core Value Proposition
@@ -54,6 +56,7 @@ Stop Guessing. Start Decorating with Confidence. Pre-coordinated art collections
 
 ## 🛠️ Tech Stack
 
+### Frontend
 - **Framework:** Next.js 14+ with App Router
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
@@ -62,6 +65,14 @@ Stop Guessing. Start Decorating with Confidence. Pre-coordinated art collections
 - **Animations:** Framer Motion
 - **Fonts:** Google Fonts (Inter & Playfair Display)
 - **Image Optimization:** Next.js Image component
+
+### Backend (Shopify)
+- **E-commerce Platform:** Shopify
+- **API:** Shopify Storefront API
+- **SDK:** shopify-buy
+- **Payment Processing:** Shopify Payments (or third-party gateway)
+- **Checkout:** Shopify hosted checkout
+- **Security:** PCI compliant, SSL included
 
 ## 📦 Project Structure
 
@@ -116,8 +127,11 @@ coherent-art-store/
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
+- Shopify store (optional for development)
 
-### Installation
+### Quick Start (Development Mode)
+
+The app works out of the box with mock data, so you can start developing immediately:
 
 1. Clone the repository:
 ```bash
@@ -136,6 +150,36 @@ npm run dev
 ```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+The app will use mock data until you configure Shopify credentials.
+
+### Production Setup with Shopify
+
+To connect to a real Shopify store:
+
+1. **Set up Shopify store** - Follow the comprehensive guide in [SHOPIFY_SETUP.md](./SHOPIFY_SETUP.md)
+
+2. **Configure environment variables:**
+```bash
+cp .env.local.example .env.local
+```
+
+3. **Add your Shopify credentials to `.env.local`:**
+```env
+NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
+NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN=shpat_your_token_here
+NEXT_PUBLIC_SHOPIFY_API_VERSION=2024-01
+NEXT_PUBLIC_USE_MOCK_DATA=false
+```
+
+4. **Restart the development server:**
+```bash
+npm run dev
+```
+
+Now the app will fetch products from Shopify and redirect checkout to Shopify's secure checkout page.
+
+📚 **For detailed Shopify setup instructions, see [SHOPIFY_SETUP.md](./SHOPIFY_SETUP.md)**
 
 ### Available Scripts
 
@@ -185,33 +229,88 @@ The cart uses Zustand with persistence for:
 - Updating quantities
 - Calculating totals
 - Persisting cart state across sessions
+- Creating Shopify checkouts
+- Managing checkout URLs
 
 ```typescript
-const { items, addItem, removeItem, updateQuantity, getTotal } = useCartStore();
+const { items, addItem, removeItem, updateQuantity, getTotal, proceedToCheckout } = useCartStore();
+
+// Proceed to Shopify checkout
+const checkoutUrl = await proceedToCheckout();
+window.location.href = checkoutUrl; // Redirect to Shopify
 ```
 
-## 📊 Mock Data
+## 📊 Data Management
 
-The application includes comprehensive mock data for:
+### Mock Data Mode (Development)
+
+The application includes comprehensive mock data for development:
 - 4 featured art collections with multiple pieces each
 - Customer testimonials with ratings
 - Room mockup configurations
 - Pricing tiers (Budget, Premium, Luxury)
 
-**Note:** In production, this should be replaced with real API calls to a backend service.
+Enable mock data mode with:
+```env
+NEXT_PUBLIC_USE_MOCK_DATA=true
+```
 
-## 🔐 Backend Integration Points
+### Production Mode (Shopify)
 
-The following areas need backend integration:
+In production, all data comes from Shopify:
+- Products fetched via Shopify Storefront API
+- Images served from Shopify CDN
+- Pricing and inventory managed in Shopify Admin
+- Checkout handled by Shopify's secure checkout
 
-1. **Collections API** - Fetch real collection data
-2. **Quiz Results** - Store and retrieve personalized recommendations
-3. **Cart Persistence** - Store cart data per user
-4. **Checkout** - Payment processing (Stripe, PayPal, etc.)
-5. **Order Management** - Order tracking and fulfillment
-6. **Email Service** - Confirmation emails, marketing
-7. **User Authentication** - Account creation and management
-8. **Analytics** - Track user behavior and conversions
+Set to Shopify mode with:
+```env
+NEXT_PUBLIC_USE_MOCK_DATA=false
+```
+
+## 🔐 Shopify Integration
+
+### ✅ Handled by Shopify (No Code Required!)
+
+The following are all managed by Shopify out of the box:
+
+1. ✅ **Payment Processing** - Credit cards, PayPal, Apple Pay, Google Pay
+2. ✅ **Secure Checkout** - PCI compliant, SSL included
+3. ✅ **Order Management** - Dashboard for tracking orders
+4. ✅ **Inventory Management** - Automatic stock tracking
+5. ✅ **Customer Management** - Built-in customer database
+6. ✅ **Email Notifications** - Order confirmations, shipping updates
+7. ✅ **Abandoned Cart Recovery** - Automatic follow-up emails
+8. ✅ **Taxes & Shipping** - Automatic calculation
+9. ✅ **Fraud Protection** - Built-in fraud analysis
+
+### Frontend Integration Points
+
+The frontend integrates with Shopify through:
+
+1. **Products API** (`lib/shopify/products.ts`)
+   - Fetch all collections
+   - Fetch single collection by ID
+   - Search collections
+
+2. **Checkout API** (`lib/shopify/checkout.ts`)
+   - Create checkout
+   - Add line items
+   - Get checkout URL for redirect
+
+3. **Cart Store** (`lib/store/cartStore.ts`)
+   - Manages cart state locally
+   - Creates Shopify checkout on "Proceed to Checkout"
+   - Redirects to Shopify hosted checkout
+
+### What You Need to Do
+
+1. **Set up Shopify store** - Follow [SHOPIFY_SETUP.md](./SHOPIFY_SETUP.md)
+2. **Create products** - Add your art collections to Shopify
+3. **Configure environment variables** - Add Shopify credentials
+4. **Deploy** - Push to production with Shopify mode enabled
+
+That's it! No backend code required.
 
 ## 🎯 Conversion Optimization Features
 

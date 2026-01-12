@@ -2,12 +2,33 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { useCartStore } from "@/lib/store/cartStore";
 import TrustBadge from "@/components/ui/TrustBadge";
 import { motion } from "framer-motion";
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, getTotal, clearCart } = useCartStore();
+  const { items, removeItem, updateQuantity, getTotal, clearCart, proceedToCheckout } = useCartStore();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleCheckout = async () => {
+    setIsProcessing(true);
+    try {
+      const checkoutUrl = await proceedToCheckout();
+
+      // Redirect to Shopify checkout
+      if (checkoutUrl && checkoutUrl !== '/checkout') {
+        window.location.href = checkoutUrl;
+      } else {
+        // Fallback for mock mode - go to local checkout
+        window.location.href = '/checkout';
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('There was an error creating your checkout. Please try again.');
+      setIsProcessing(false);
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -172,13 +193,21 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                <Link href="/checkout" className="btn-primary w-full block text-center mb-4">
-                  Proceed to Checkout
-                </Link>
+                <button
+                  onClick={handleCheckout}
+                  disabled={isProcessing}
+                  className="btn-primary w-full block text-center mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isProcessing ? 'Processing...' : 'Proceed to Secure Checkout'}
+                </button>
+
+                <p className="text-xs text-gray-600 text-center mb-4">
+                  You will be redirected to our secure Shopify checkout
+                </p>
 
                 {/* Trust Badges */}
                 <div className="space-y-3 mt-6 pt-6 border-t border-gray-200">
-                  <TrustBadge icon="🔒" text="Secure Checkout" />
+                  <TrustBadge icon="🔒" text="Secure Checkout" subtext="Powered by Shopify" />
                   <TrustBadge icon="🚚" text="Free Shipping" />
                   <TrustBadge icon="↩️" text="30-Day Returns" />
                 </div>
@@ -186,14 +215,7 @@ export default function CartPage() {
                 {/* Promo Code */}
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <p className="text-sm font-medium text-gray-700 mb-2">Have a promo code?</p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Enter code"
-                      className="input-field flex-1"
-                    />
-                    <button className="btn-outline px-4">Apply</button>
-                  </div>
+                  <p className="text-xs text-gray-600">Apply it at checkout</p>
                 </div>
               </div>
             </div>
