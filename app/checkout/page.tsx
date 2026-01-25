@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useCartStore } from "@/lib/store/cartStore";
@@ -31,8 +31,15 @@ export default function CheckoutPage() {
     formState: { errors },
   } = useForm<CheckoutForm>();
 
+  // Redirect to cart if empty (client-side only)
+  useEffect(() => {
+    if (items.length === 0) {
+      router.push("/cart");
+    }
+  }, [items.length, router]);
+
+  // Show loading while checking
   if (items.length === 0) {
-    router.push("/cart");
     return null;
   }
 
