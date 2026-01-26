@@ -1,123 +1,125 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect, useState, useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { motion } from "framer-motion";
+
+const heroImages = [
+  "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1200&h=800&fit=crop",
+  "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1200&h=800&fit=crop",
+  "https://images.unsplash.com/photo-1582201957195-65f5e6d9f96a?w=1200&h=800&fit=crop",
+  "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=1200&h=800&fit=crop",
+  "https://images.unsplash.com/photo-1549289524-06cf8837ace5?w=1200&h=800&fit=crop",
+  "https://images.unsplash.com/photo-1533158326339-7f3cf2404354?w=1200&h=800&fit=crop",
+];
 
 export default function Hero() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  });
+
+  // Parallax effect - images move faster than scroll
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+
+  // Rotate images as you scroll
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.onChange((latest) => {
+      // Change image every 20% scroll
+      const newIndex = Math.floor(latest * 5) % heroImages.length;
+      setCurrentIndex(newIndex);
+    });
+
+    return () => unsubscribe();
+  }, [scrollYProgress]);
+
+  // Get 4 consecutive images starting from current index
+  const visibleImages = [
+    heroImages[currentIndex % heroImages.length],
+    heroImages[(currentIndex + 1) % heroImages.length],
+    heroImages[(currentIndex + 2) % heroImages.length],
+    heroImages[(currentIndex + 3) % heroImages.length],
+  ];
+
   return (
-    <section className="relative bg-gradient-to-br from-background-warm to-background py-20 md:py-32 overflow-hidden">
-      <div className="container-custom">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Column - Text Content */}
+    <div ref={containerRef} className="relative h-[100vh] overflow-hidden">
+      {/* Image Container with Parallax */}
+      <motion.div
+        style={{ y }}
+        className="absolute inset-0 flex flex-col"
+      >
+        {visibleImages.map((image, index) => (
+          <motion.div
+            key={`${currentIndex}-${index}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: index * 0.1 }}
+            className="relative flex-1 min-h-0"
+          >
+            {/* Image */}
+            <div className="absolute inset-0">
+              <Image
+                src={image}
+                alt={`Art collection ${index + 1}`}
+                fill
+                className="object-cover"
+                sizes="100vw"
+                priority={index === 0}
+              />
+            </div>
+
+            {/* Dark Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/60" />
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Headline Text - Centered */}
+      <div className="absolute inset-0 flex items-center justify-center z-10 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.3 }}
+          className="text-center"
+        >
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-tight mb-4">
+            Stop Guessing.
+          </h1>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-6">
+            Start Decorating
+          </h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight">
+            with Confidence.
+          </h2>
+
+          {/* CTA Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="space-y-8"
+            transition={{ duration: 1, delay: 0.8 }}
+            className="mt-8 flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <div className="space-y-4">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-primary leading-tight">
-                Stop Guessing.
-                <br />
-                <span className="text-accent">Start Decorating</span>
-                <br />
-                with Confidence.
-              </h1>
-              <p className="text-xl md:text-2xl text-gray-600 max-w-xl">
-                Pre-coordinated art collections designed to flow seamlessly through your entire home
-              </p>
-            </div>
-
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/quiz" className="btn-primary text-center">
-                Find Your Perfect Collection
-              </Link>
-              <Link href="/collections" className="btn-outline text-center">
-                Browse Collections
-              </Link>
-            </div>
-
-            {/* Trust Indicators */}
-            <div className="flex flex-wrap gap-6 pt-4">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">✓</span>
-                <span className="text-sm font-medium">Free Shipping</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">✓</span>
-                <span className="text-sm font-medium">30-Day Returns</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">✓</span>
-                <span className="text-sm font-medium">Satisfaction Guaranteed</span>
-              </div>
-            </div>
+            <a
+              href="/quiz"
+              className="bg-white text-primary px-8 py-4 rounded-lg font-semibold text-lg hover:bg-accent hover:text-white transition-all duration-300 shadow-xl"
+            >
+              Find Your Perfect Collection
+            </a>
+            <a
+              href="/collections"
+              className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-primary transition-all duration-300"
+            >
+              Browse Collections
+            </a>
           </motion.div>
-
-          {/* Right Column - Visual */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative"
-          >
-            {/* Before/After Comparison */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Before */}
-              <div className="space-y-2">
-                <div className="bg-red-100 px-3 py-1 rounded-full inline-block">
-                  <span className="text-sm font-medium text-red-700">Before</span>
-                </div>
-                <div className="card p-4 space-y-3">
-                  <div className="aspect-[3/4] bg-gray-200 rounded relative overflow-hidden">
-                    <Image
-                      src="https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=400"
-                      alt="Mismatched art"
-                      fill
-                      className="object-cover opacity-60"
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-600">❌ Decision Paralysis</p>
-                    <p className="text-sm font-medium text-gray-600">❌ Mismatched Styles</p>
-                    <p className="text-sm font-medium text-gray-600">❌ Hours Wasted</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* After */}
-              <div className="space-y-2">
-                <div className="bg-green-100 px-3 py-1 rounded-full inline-block">
-                  <span className="text-sm font-medium text-green-700">After</span>
-                </div>
-                <div className="card p-4 space-y-3 ring-2 ring-accent">
-                  <div className="aspect-[3/4] bg-gray-100 rounded relative overflow-hidden">
-                    <Image
-                      src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400"
-                      alt="Coordinated collection"
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-success">✓ Perfect Harmony</p>
-                    <p className="text-sm font-medium text-success">✓ Cohesive Design</p>
-                    <p className="text-sm font-medium text-success">✓ Instant Confidence</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Decorative Elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl -z-10" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10" />
-    </section>
+      {/* Soft Fade at Bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent z-10 pointer-events-none" />
+    </div>
   );
 }
