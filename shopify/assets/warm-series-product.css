@@ -25,38 +25,41 @@
 .ws-root .ws-gallery-col { display: block; }
 .ws-root .ws-content-col { display: block; }
 
-/* Gallery — 4 horizontal bands, each swiped independently */
-.ws-root .hero-gallery { height: 85dvh; max-height: 620px; min-height: 340px; display: flex; flex-direction: column; position: relative; }
+/* Gallery — one large print at a time, true 4:3, plus a thumbnail strip for the set */
+.ws-root .hero-gallery { display: flex; flex-direction: column; position: relative; }
 .ws-root .rig-note {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 5; text-align: center;
+  text-align: center;
   font-family: var(--mono); font-size: 10px; letter-spacing: 0.2px; color: var(--muted);
-  background: linear-gradient(180deg, rgba(23,28,22,0.85), transparent);
-  padding: 7px 10px 20px; pointer-events: none;
+  background: var(--panel);
+  padding: 7px 10px; pointer-events: none;
 }
-.ws-root .band-stack { flex: 1; display: grid; grid-template-rows: repeat(4, 1fr); min-height: 0; }
-.ws-root .band { position: relative; min-height: 0; border-bottom: 1px solid var(--line); }
-.ws-root .band:last-child { border-bottom: none; }
-.ws-root .band-track { height: 100%; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; }
-.ws-root .band-track::-webkit-scrollbar { display: none; }
-.ws-root .slide { flex: 0 0 100%; height: 100%; scroll-snap-align: start; position: relative; display: block; background: var(--panel); }
-.ws-root .slide-bg { width: 100%; height: 100%; background-size: contain; background-position: center; background-repeat: no-repeat; }
-.ws-root .slide.full-art { display: flex; align-items: center; justify-content: center; background: var(--panel); }
-.ws-root .slide.full-art .art-box {
-  height: 100%; max-height: 100%; max-width: 100%; width: 100%;
-  background-size: contain; background-position: center; background-repeat: no-repeat;
-}
+.ws-root .hero-track { display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.ws-root .hero-track::-webkit-scrollbar { display: none; }
+.ws-root .hero-slide { flex: 0 0 100%; scroll-snap-align: start; position: relative; display: block; background: var(--panel); }
+.ws-root .hero-frame { width: 100%; aspect-ratio: 4/3; background-size: cover; background-position: center; background-repeat: no-repeat; }
 .ws-root .placeholder-art { background: repeating-linear-gradient(45deg, rgba(244,241,232,0.04), rgba(244,241,232,0.04) 8px, transparent 8px, transparent 16px); }
 .ws-root .slide-label {
-  position: absolute; bottom: 8px; left: 8px; font-family: var(--mono); font-size: 9px;
+  position: absolute; bottom: 10px; left: 10px; font-family: var(--mono); font-size: 9px;
   letter-spacing: 0.3px; text-transform: uppercase; color: var(--paper);
   background: rgba(15, 18, 14, 0.55); padding: 4px 8px; border-radius: 999px; z-index: 2;
 }
-.ws-root .piece-tag { position: absolute; top: 8px; left: 10px; z-index: 2; display: flex; align-items: baseline; gap: 6px; }
-.ws-root .piece-tag .name { font-family: var(--serif); font-style: italic; font-size: 13.5px; color: var(--paper); background: rgba(15, 18, 14, 0.55); padding: 3px 9px; border-radius: 999px; }
+.ws-root .piece-tag { position: absolute; top: 10px; left: 10px; z-index: 2; display: flex; align-items: baseline; gap: 6px; }
+.ws-root .piece-tag .name { font-family: var(--serif); font-style: italic; font-size: 14px; color: var(--paper); background: rgba(15, 18, 14, 0.55); padding: 4px 10px; border-radius: 999px; }
 .ws-root .piece-tag .price { font-family: var(--mono); font-size: 10px; color: var(--brass); background: rgba(15, 18, 14, 0.55); padding: 3px 7px; border-radius: 999px; }
-.ws-root .band-dots { position: absolute; bottom: 8px; right: 10px; display: flex; gap: 4px; z-index: 2; }
-.ws-root .dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(244, 241, 232, 0.35); transition: background 0.2s, transform 0.2s; }
-.ws-root .dot.active { background: var(--brass); transform: scale(1.3); }
+
+.ws-root .thumb-strip { display: flex; gap: 1px; background: var(--line); border-top: 1px solid var(--line); }
+.ws-root .thumb {
+  flex: 1 1 0; aspect-ratio: 4/3; min-width: 0; border: none; cursor: pointer;
+  background-color: var(--panel); background-size: cover; background-position: center; background-repeat: no-repeat;
+  position: relative; padding: 0; opacity: 0.5; transition: opacity 0.15s;
+}
+.ws-root .thumb:hover { opacity: 0.75; }
+.ws-root .thumb.active { opacity: 1; box-shadow: inset 0 0 0 2px var(--brass); }
+.ws-root .thumb-label {
+  position: absolute; bottom: 4px; left: 4px; right: 4px; font-family: var(--mono); font-size: 7.5px;
+  letter-spacing: 0.2px; text-transform: uppercase; color: var(--paper); text-align: left;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 
 /* Buy box */
 .ws-root .buybox { padding: 22px 16px 0; }
@@ -193,6 +196,5 @@
     gap: 0;
   }
   .ws-root .ws-gallery-col { position: sticky; top: 0; }
-  .ws-root .hero-gallery { height: 100vh; max-height: 880px; }
   .ws-root .ws-content-col { padding-left: 8px; }
 }

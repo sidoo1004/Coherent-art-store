@@ -19,81 +19,79 @@
 
   <section class="hero-gallery" aria-label="The prints in this set">
     {%- if section.settings.show_rig_note -%}
-      <div class="rig-note">{{ section.settings.rig_note | default: "Each row is one print in the set — swipe a row for its other photos" | escape }}</div>
+      <div class="rig-note">{{ section.settings.rig_note | default: "Swipe to see each print — tap a thumbnail to jump" | escape }}</div>
     {%- endif -%}
-    <div class="band-stack">
 
+    <div class="hero-track" id="hero-track-{{ section.id }}">
       {%- for block in print_blocks -%}
-        {%- assign band_index = forloop.index0 -%}
+        {%- assign print_index = forloop.index0 -%}
         {%- if block.settings.name != blank -%}
           {%- assign print_name = block.settings.name -%}
         {%- else -%}
           {%- assign print_name = "Print " | append: forloop.index -%}
         {%- endif -%}
-        {%- assign fallback_image = product.images[band_index] -%}
-        <div class="band" {{ block.shopify_attributes }}>
-          <span class="piece-tag"><span class="name">{{ print_name }}</span></span>
-          <div class="band-track" id="track-{{ section.id }}-{{ band_index }}">
-            {%- assign has_any_image = false -%}
-            {%- for i in (1..3) -%}
-              {%- assign img_key = "image_" | append: i -%}
-              {%- assign cap_key = "caption_" | append: i -%}
-              {%- assign block_image = block.settings[img_key] -%}
-              {%- if block_image == blank and i == 1 and fallback_image -%}
-                {%- assign block_image = fallback_image -%}
-              {%- endif -%}
-              {%- if block_image -%}
-                {%- assign has_any_image = true -%}
-                {%- assign block_caption = block.settings[cap_key] -%}
-                {%- if block_caption == blank -%}{%- assign block_caption = "Photo " | append: i -%}{%- endif -%}
-                <div class="slide{% if forloop.first %} full-art{% endif %}">
-                  {%- if forloop.first -%}
-                    <div class="art-box" style="background-image:url('{{ block_image | image_url: width: 1600 }}')"></div>
-                  {%- else -%}
-                    <div class="slide-bg" style="background-image:url('{{ block_image | image_url: width: 1600 }}')"></div>
-                  {%- endif -%}
-                  <span class="slide-label">{{ block_caption }}</span>
-                </div>
-              {%- endif -%}
-            {%- endfor -%}
-            {%- unless has_any_image -%}
-              <div class="slide full-art">
-                <div class="art-box placeholder-art"></div>
-                <span class="slide-label">Add a photo for {{ print_name }}</span>
-              </div>
-            {%- endunless -%}
+        {%- assign fallback_image = product.images[print_index] -%}
+        {%- assign has_any_image = false -%}
+        {%- for i in (1..3) -%}
+          {%- assign img_key = "image_" | append: i -%}
+          {%- assign cap_key = "caption_" | append: i -%}
+          {%- assign block_image = block.settings[img_key] -%}
+          {%- if block_image == blank and i == 1 and fallback_image -%}
+            {%- assign block_image = fallback_image -%}
+          {%- endif -%}
+          {%- if block_image -%}
+            {%- assign has_any_image = true -%}
+            {%- assign block_caption = block.settings[cap_key] -%}
+            {%- if block_caption == blank -%}{%- assign block_caption = "Photo " | append: i -%}{%- endif -%}
+            <div class="hero-slide" data-print="{{ print_index }}">
+              <div class="hero-frame" style="background-image:url('{{ block_image | image_url: width: 1800 }}')"></div>
+              <span class="piece-tag"><span class="name">{{ print_name }}</span></span>
+              <span class="slide-label">{{ block_caption }}</span>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- unless has_any_image -%}
+          <div class="hero-slide" data-print="{{ print_index }}">
+            <div class="hero-frame placeholder-art"></div>
+            <span class="piece-tag"><span class="name">{{ print_name }}</span></span>
+            <span class="slide-label">Add a photo for {{ print_name }}</span>
           </div>
-          <div class="band-dots" data-for="track-{{ section.id }}-{{ band_index }}"></div>
-        </div>
+        {%- endunless -%}
       {%- else -%}
-        <div class="band">
-          <span class="piece-tag"><span class="name">{{ product.title }}</span></span>
-          <div class="band-track" id="track-{{ section.id }}-0">
-            {%- for image in product.images limit: 4 -%}
-              {%- if image.alt != blank -%}
-                {%- assign img_caption = image.alt -%}
-              {%- else -%}
-                {%- assign img_caption = "Photo " | append: forloop.index -%}
-              {%- endif -%}
-              <div class="slide{% if forloop.first %} full-art{% endif %}">
-                {%- if forloop.first -%}
-                  <div class="art-box" style="background-image:url('{{ image | image_url: width: 1600 }}')"></div>
-                {%- else -%}
-                  <div class="slide-bg" style="background-image:url('{{ image | image_url: width: 1600 }}')"></div>
-                {%- endif -%}
-                <span class="slide-label">{{ img_caption }}</span>
-              </div>
-            {%- else -%}
-              <div class="slide full-art">
-                <div class="art-box placeholder-art"></div>
-                <span class="slide-label">Add a "Print" block for each piece in the set</span>
-              </div>
-            {%- endfor -%}
+        {%- for image in product.images limit: 4 -%}
+          {%- if image.alt != blank -%}
+            {%- assign img_caption = image.alt -%}
+          {%- else -%}
+            {%- assign img_caption = "Photo " | append: forloop.index -%}
+          {%- endif -%}
+          <div class="hero-slide" data-print="{{ forloop.index0 }}">
+            <div class="hero-frame" style="background-image:url('{{ image | image_url: width: 1800 }}')"></div>
+            <span class="piece-tag"><span class="name">{{ product.title }}</span></span>
+            <span class="slide-label">{{ img_caption }}</span>
           </div>
-          <div class="band-dots" data-for="track-{{ section.id }}-0"></div>
-        </div>
+        {%- else -%}
+          <div class="hero-slide" data-print="0">
+            <div class="hero-frame placeholder-art"></div>
+            <span class="slide-label">Add a "Print" block for each piece in the set</span>
+          </div>
+        {%- endfor -%}
       {%- endfor -%}
+    </div>
 
+    <div class="thumb-strip" id="thumb-strip-{{ section.id }}">
+      {%- for block in print_blocks -%}
+        {%- assign print_index = forloop.index0 -%}
+        {%- if block.settings.name != blank -%}
+          {%- assign print_name = block.settings.name -%}
+        {%- else -%}
+          {%- assign print_name = "Print " | append: forloop.index -%}
+        {%- endif -%}
+        {%- assign thumb_image = block.settings.image_1 -%}
+        {%- if thumb_image == blank -%}{%- assign thumb_image = product.images[print_index] -%}{%- endif -%}
+        <button type="button" class="thumb{% if forloop.first %} active{% endif %}" data-print="{{ print_index }}" aria-label="{{ print_name | escape }}"{% if thumb_image %} style="background-image:url('{{ thumb_image | image_url: width: 300 }}')"{% endif %}>
+          <span class="thumb-label">{{ print_name }}</span>
+        </button>
+      {%- endfor -%}
     </div>
   </section>
 
@@ -320,7 +318,7 @@
       "content": "Add one 'Print' block below per piece in the set, then assign its photo(s) in each block."
     },
     { "type": "checkbox", "id": "show_rig_note", "label": "Show swipe hint text", "default": true },
-    { "type": "text", "id": "rig_note", "label": "Swipe hint text", "default": "Each row is one print in the set — swipe a row for its other photos" },
+    { "type": "text", "id": "rig_note", "label": "Swipe hint text", "default": "Swipe to see each print — tap a thumbnail to jump" },
 
     { "type": "header", "content": "Buy box" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow text", "default": "Limited Edition" },
