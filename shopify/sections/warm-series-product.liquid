@@ -293,7 +293,7 @@
       <div class="g-icon">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.5"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <h2>{{ section.settings.guarantee_heading | default: "Try it on your wall, risk-free" }}</h2>
+      <h2>{{ section.settings.guarantee_heading | default: "Printed fresh, just for you" }}</h2>
       <p>{{ section.settings.guarantee_text }}</p>
       <a class="btn-add" href="#product-form-{{ section.id }}">{{ section.settings.guarantee_button_label | default: "Shop Now" }}</a>
     </section>
@@ -321,7 +321,7 @@
     { "type": "text", "id": "rig_note", "label": "Swipe hint text", "default": "Swipe to see each print — tap a thumbnail to jump" },
 
     { "type": "header", "content": "Buy box" },
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow text", "default": "Limited Edition" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow text", "default": "The Full Set" },
     { "type": "text", "id": "artist_line", "label": "Artist / origin line" },
     { "type": "checkbox", "id": "buy_now_enabled", "label": "Show secondary Buy Now button", "default": true },
     { "type": "text", "id": "buy_now_label", "label": "Buy Now button label", "default": "Buy Now" },
@@ -364,8 +364,8 @@
 
     { "type": "header", "content": "Guarantee banner" },
     { "type": "checkbox", "id": "show_guarantee", "label": "Show guarantee banner", "default": true },
-    { "type": "text", "id": "guarantee_heading", "label": "Heading", "default": "Try it on your wall, risk-free" },
-    { "type": "text", "id": "guarantee_text", "label": "Body text", "default": "If it doesn't look right in your space, send it back within 30 days for a full refund." },
+    { "type": "text", "id": "guarantee_heading", "label": "Heading", "default": "Printed fresh, just for you" },
+    { "type": "text", "id": "guarantee_text", "label": "Body text", "default": "Add your real return/refund policy here — don't leave a claim you can't back up." },
     { "type": "text", "id": "guarantee_button_label", "label": "Button label", "default": "Shop Now" }
   ],
   "blocks": [
@@ -387,7 +387,7 @@
       "name": "Trust icon",
       "settings": [
         { "type": "html", "id": "icon_svg", "label": "Icon SVG markup", "default": "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\"><path d=\"M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg>" },
-        { "type": "text", "id": "label", "label": "Label (use <br> for 2 lines)", "default": "30-Day<br>Guarantee" }
+        { "type": "text", "id": "label", "label": "Label (use <br> for 2 lines)", "default": "Made<br>to Order" }
       ]
     },
     {
@@ -395,7 +395,7 @@
       "name": "Benefit",
       "settings": [
         { "type": "html", "id": "icon_svg", "label": "Icon SVG markup", "default": "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\"><path d=\"M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg>" },
-        { "type": "text", "id": "title", "label": "Title", "default": "Fade-Resistant" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Vivid, True Color" },
         { "type": "textarea", "id": "text", "label": "Text" }
       ]
     },
@@ -403,7 +403,7 @@
       "type": "step",
       "name": "Process step",
       "settings": [
-        { "type": "text", "id": "title", "label": "Title", "default": "Painted in Oaxaca" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Printed on demand" },
         { "type": "textarea", "id": "text", "label": "Text" }
       ]
     },
@@ -411,8 +411,8 @@
       "type": "spec",
       "name": "Spec row",
       "settings": [
-        { "type": "text", "id": "label", "label": "Label", "default": "Medium" },
-        { "type": "text", "id": "value", "label": "Value", "default": "Archival pigment print" }
+        { "type": "text", "id": "label", "label": "Label", "default": "Print type" },
+        { "type": "text", "id": "value", "label": "Value", "default": "Matte poster print" }
       ]
     },
     {
@@ -420,8 +420,8 @@
       "name": "Comparison row",
       "settings": [
         { "type": "text", "id": "label", "label": "Row label", "default": "Print method" },
-        { "type": "text", "id": "ours", "label": "Our value", "default": "Archival giclée" },
-        { "type": "text", "id": "theirs", "label": "Their value", "default": "Standard inkjet" }
+        { "type": "text", "id": "ours", "label": "Our value", "default": "Thick 10.3mil matte, printed to order" },
+        { "type": "text", "id": "theirs", "label": "Their value", "default": "Thin mass-produced stock" }
       ]
     },
     {
@@ -450,22 +450,22 @@
         { "type": "print", "settings": { "name": "Print 2" } },
         { "type": "print", "settings": { "name": "Print 3" } },
         { "type": "print", "settings": { "name": "Print 4" } },
-        { "type": "icon", "settings": { "label": "30-Day<br>Guarantee" } },
-        { "type": "icon", "settings": { "label": "Free Ship<br>Over $150" } },
-        { "type": "icon", "settings": { "label": "Cotton<br>Rag 310g" } },
-        { "type": "icon", "settings": { "label": "Hand-Signed<br>Giclée" } },
-        { "type": "benefit", "settings": { "title": "Fade-Resistant", "text": "Archival pigment inks rated to hold color for 100+ years, even near sunlight." } },
-        { "type": "benefit", "settings": { "title": "Genuinely Limited", "text": "Numbered, hand-signed editions — never reprinted once the run sells out." } },
-        { "type": "benefit", "settings": { "title": "Built to Match", "text": "Part of a multi-piece series painted in one palette, so it pairs with the rest of your home." } },
-        { "type": "benefit", "settings": { "title": "Risk-Free", "text": "30-day returns and a true-to-size wall preview before you buy." } },
-        { "type": "step", "settings": { "title": "Painted by hand", "text": "The full composition is painted before it's ever scanned." } },
-        { "type": "step", "settings": { "title": "Archivally printed", "text": "Giclée pigment inks on 310gsm cotton rag." } },
-        { "type": "step", "settings": { "title": "Numbered & signed", "text": "Each impression is hand-numbered and signed before it ships." } },
-        { "type": "spec", "settings": { "label": "Medium", "value": "Archival pigment print" } },
-        { "type": "spec", "settings": { "label": "Paper", "value": "310gsm cotton rag" } },
+        { "type": "icon", "settings": { "label": "Made<br>to Order" } },
+        { "type": "icon", "settings": { "label": "Thick Matte<br>Paper" } },
+        { "type": "icon", "settings": { "label": "Vivid<br>Color Print" } },
+        { "type": "icon", "settings": { "label": "Ships in<br>2-5 Days" } },
+        { "type": "benefit", "settings": { "title": "Vivid, True Color", "text": "Printed with water-based inkjet at 104% ISO brightness on thick 10.3mil matte paper — sharp detail, no washed-out color." } },
+        { "type": "benefit", "settings": { "title": "Printed Fresh Per Order", "text": "Nothing sits in a warehouse — your set is printed specifically for you when you order." } },
+        { "type": "benefit", "settings": { "title": "Built to Match", "text": "Part of a multi-piece series designed in one palette, so it pairs with the rest of your home." } },
+        { "type": "benefit", "settings": { "title": "Easy Returns", "text": "Change your mind? Returns are accepted on unopened items — see our return policy for details." } },
+        { "type": "step", "settings": { "title": "Designed as a set", "text": "Each piece shares one palette and mood, so the four work together as one collection." } },
+        { "type": "step", "settings": { "title": "Printed on demand", "text": "Thick 10.3mil matte paper, water-based inkjet print, made fresh for your order." } },
+        { "type": "step", "settings": { "title": "Shipped to your door", "text": "Carefully packed and shipped directly once your order is printed." } },
+        { "type": "spec", "settings": { "label": "Print type", "value": "Matte poster print" } },
+        { "type": "spec", "settings": { "label": "Paper", "value": "10.3 mil enhanced matte, 104% ISO brightness" } },
         { "type": "spec", "settings": { "label": "Ratio", "value": "4:3, all sizes" } },
         { "type": "faq", "settings": { "question": "How do I know what size to pick?", "answer": "Each size shows exact centimeters in the selector above." } },
-        { "type": "faq", "settings": { "question": "Can I return it if I change my mind?", "answer": "Yes — returns are accepted within 30 days in original condition." } }
+        { "type": "faq", "settings": { "question": "Can I return it if I change my mind?", "answer": "See our return policy page for the current terms." } }
       ]
     }
   ]
