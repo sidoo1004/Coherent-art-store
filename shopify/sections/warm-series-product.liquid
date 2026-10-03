@@ -1,0 +1,473 @@
+{%- comment -%}
+  Coherent product section — the product itself is a matched set of prints.
+  Online Store 2.0 section. Add to a Product template via
+  Online Store > Themes > Customize > Product page > Add section > Warm Series Product.
+  Needs: one "Print" block per piece in the set, each with its own photo(s) picked
+  in the theme editor, and variant options (e.g. "Size" / "Frame") with real prices.
+{%- endcomment -%}
+
+{%- comment -%} If these fonts are already loaded sitewide in theme.liquid, remove this line to avoid loading them twice. {%- endcomment -%}
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+{{ 'warm-series-product.css' | asset_url | stylesheet_tag }}
+
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign print_blocks = section.blocks | where: "type", "print" -%}
+
+<div class="ws-root" id="ws-root-{{ section.id }}">
+<div class="ws-layout">
+<div class="ws-gallery-col">
+
+  <section class="hero-gallery" aria-label="The prints in this set">
+    {%- if section.settings.show_rig_note -%}
+      <div class="rig-note">{{ section.settings.rig_note | default: "Swipe to see each print — tap a thumbnail to jump" | escape }}</div>
+    {%- endif -%}
+
+    <div class="hero-track" id="hero-track-{{ section.id }}">
+      {%- for block in print_blocks -%}
+        {%- assign print_index = forloop.index0 -%}
+        {%- if block.settings.name != blank -%}
+          {%- assign print_name = block.settings.name -%}
+        {%- else -%}
+          {%- assign print_name = "Print " | append: forloop.index -%}
+        {%- endif -%}
+        {%- assign fallback_image = product.images[print_index] -%}
+        {%- assign has_any_image = false -%}
+        {%- for i in (1..3) -%}
+          {%- assign img_key = "image_" | append: i -%}
+          {%- assign cap_key = "caption_" | append: i -%}
+          {%- assign block_image = block.settings[img_key] -%}
+          {%- if block_image == blank and i == 1 and fallback_image -%}
+            {%- assign block_image = fallback_image -%}
+          {%- endif -%}
+          {%- if block_image -%}
+            {%- assign has_any_image = true -%}
+            {%- assign block_caption = block.settings[cap_key] -%}
+            {%- if block_caption == blank -%}{%- assign block_caption = "Photo " | append: i -%}{%- endif -%}
+            <div class="hero-slide" data-print="{{ print_index }}">
+              <div class="hero-frame" style="background-image:url('{{ block_image | image_url: width: 1800 }}')"></div>
+              <span class="piece-tag"><span class="name">{{ print_name }}</span></span>
+              <span class="slide-label">{{ block_caption }}</span>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- unless has_any_image -%}
+          <div class="hero-slide" data-print="{{ print_index }}">
+            <div class="hero-frame placeholder-art"></div>
+            <span class="piece-tag"><span class="name">{{ print_name }}</span></span>
+            <span class="slide-label">Add a photo for {{ print_name }}</span>
+          </div>
+        {%- endunless -%}
+      {%- else -%}
+        {%- for image in product.images limit: 4 -%}
+          {%- if image.alt != blank -%}
+            {%- assign img_caption = image.alt -%}
+          {%- else -%}
+            {%- assign img_caption = "Photo " | append: forloop.index -%}
+          {%- endif -%}
+          <div class="hero-slide" data-print="{{ forloop.index0 }}">
+            <div class="hero-frame" style="background-image:url('{{ image | image_url: width: 1800 }}')"></div>
+            <span class="piece-tag"><span class="name">{{ product.title }}</span></span>
+            <span class="slide-label">{{ img_caption }}</span>
+          </div>
+        {%- else -%}
+          <div class="hero-slide" data-print="0">
+            <div class="hero-frame placeholder-art"></div>
+            <span class="slide-label">Add a "Print" block for each piece in the set</span>
+          </div>
+        {%- endfor -%}
+      {%- endfor -%}
+    </div>
+
+    <div class="thumb-strip" id="thumb-strip-{{ section.id }}">
+      {%- for block in print_blocks -%}
+        {%- assign print_index = forloop.index0 -%}
+        {%- if block.settings.name != blank -%}
+          {%- assign print_name = block.settings.name -%}
+        {%- else -%}
+          {%- assign print_name = "Print " | append: forloop.index -%}
+        {%- endif -%}
+        {%- assign thumb_image = block.settings.image_1 -%}
+        {%- if thumb_image == blank -%}{%- assign thumb_image = product.images[print_index] -%}{%- endif -%}
+        <button type="button" class="thumb{% if forloop.first %} active{% endif %}" data-print="{{ print_index }}" aria-label="{{ print_name | escape }}"{% if thumb_image %} style="background-image:url('{{ thumb_image | image_url: width: 300 }}')"{% endif %}>
+          <span class="thumb-label">{{ print_name }}</span>
+        </button>
+      {%- endfor -%}
+    </div>
+  </section>
+
+</div>
+<div class="ws-content-col">
+
+  <div class="buybox">
+    {%- if section.settings.eyebrow != blank -%}<p class="eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+    <h1>{{ product.title }}</h1>
+    {%- if section.settings.artist_line != blank -%}<p class="artist-line">{{ section.settings.artist_line | escape }}</p>{%- endif -%}
+    {%- if product.description != blank -%}<div class="description">{{ product.description }}</div>{%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      {%- assign icon_blocks = section.blocks | where: "type", "icon" -%}
+      {%- if icon_blocks.size > 0 -%}
+        <div class="icon-strip">
+          {%- for block in icon_blocks -%}
+            <div class="icon-item" {{ block.shopify_attributes }}>
+              {{ block.settings.icon_svg }}
+              <span class="txt">{{ block.settings.label }}</span>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    <div class="product-form-wrap">
+      <form method="post" action="/cart/add" id="product-form-{{ section.id }}">
+        <input type="hidden" name="id" value="{{ current_variant.id }}" id="variant-id-{{ section.id }}">
+
+        {%- for option in product.options_with_values -%}
+          <div class="variant-group">
+            <span class="variant-label">{{ option.name }}</span>
+            <div class="variant-row" data-option-index="{{ forloop.index0 }}">
+              {%- for value in option.values -%}
+                {%- assign is_selected = false -%}
+                {%- if current_variant.options[forloop.parentloop.index0] == value -%}{%- assign is_selected = true -%}{%- endif -%}
+                <button type="button" class="swatch{% if is_selected %} active{% endif %}" data-value="{{ value | escape }}">
+                  <span class="s-name">{{ value }}</span>
+                </button>
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endfor -%}
+
+        <div class="price-buy-row">
+          <div class="price-stack">
+            <span class="amount" id="amount-{{ section.id }}">{{ current_variant.price | money_without_trailing_zeros }}</span>
+            {%- if current_variant.compare_at_price > current_variant.price -%}
+              <span class="sub">
+                <span class="compare" id="compare-{{ section.id }}">{{ current_variant.compare_at_price | money_without_trailing_zeros }}</span>
+                <span class="save" id="save-{{ section.id }}">
+                  {%- assign pct = current_variant.compare_at_price | minus: current_variant.price | times: 100.0 | divided_by: current_variant.compare_at_price -%}
+                  {{ pct | round }}% below list
+                </span>
+              </span>
+            {%- else -%}
+              <span class="sub" id="save-wrap-{{ section.id }}" hidden>
+                <span class="compare" id="compare-{{ section.id }}"></span>
+                <span class="save" id="save-{{ section.id }}"></span>
+              </span>
+            {%- endif -%}
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn-add" id="addToCart-{{ section.id }}"{% unless current_variant.available %} disabled{% endunless %}>
+              {% if current_variant.available %}Add{% else %}Sold Out{% endif %} — <span id="totalPrice-{{ section.id }}">{{ current_variant.price | money_without_trailing_zeros }}</span>
+            </button>
+            {%- if section.settings.buy_now_enabled -%}
+              <button type="button" class="btn-reserve" id="buyNow-{{ section.id }}">{{ section.settings.buy_now_label | default: "Buy Now" }}</button>
+            {%- endif -%}
+          </div>
+        </div>
+      </form>
+    </div>
+
+    {%- if section.settings.happy_collectors_count > 0 -%}
+      <div class="rating-line" id="ratingLine-{{ section.id }}" data-target="{{ section.settings.happy_collectors_count }}">
+        <span class="stars">{% for i in (1..5) %}★{% endfor %}</span>
+        <span class="score">{{ section.settings.rating_value | default: "4.8" }}</span>
+        <span class="dot">·</span>
+        <span class="count" id="collectorCount-{{ section.id }}">0</span>
+        <span>{{ section.settings.rating_label | default: "happy collectors" }}</span>
+      </div>
+    {%- endif -%}
+
+    <script type="application/json" id="variants-json-{{ section.id }}">{{ product.variants | json }}</script>
+  </div>
+
+  {%- comment -%} ---- Editable marketing sections, driven by blocks ---- {%- endcomment -%}
+
+  {%- assign benefit_blocks = section.blocks | where: "type", "benefit" -%}
+  {%- if benefit_blocks.size > 0 -%}
+    <section class="section">
+      {%- if section.settings.benefits_eyebrow != blank -%}<p class="eyebrow">{{ section.settings.benefits_eyebrow | escape }}</p>{%- endif -%}
+      {%- if section.settings.benefits_heading != blank -%}<h2>{{ section.settings.benefits_heading }}</h2>{%- endif -%}
+      <div class="benefits-grid">
+        {%- for block in benefit_blocks -%}
+          <div class="benefit-card" {{ block.shopify_attributes }}>
+            <div class="b-icon">{{ block.settings.icon_svg }}</div>
+            <h3>{{ block.settings.title }}</h3>
+            <p>{{ block.settings.text }}</p>
+          </div>
+        {%- endfor -%}
+      </div>
+    </section>
+  {%- endif -%}
+
+  {%- assign step_blocks = section.blocks | where: "type", "step" -%}
+  {%- if step_blocks.size > 0 -%}
+    <section class="section">
+      {%- if section.settings.steps_eyebrow != blank -%}<p class="eyebrow">{{ section.settings.steps_eyebrow | escape }}</p>{%- endif -%}
+      {%- if section.settings.steps_heading != blank -%}<h2>{{ section.settings.steps_heading }}</h2>{%- endif -%}
+      <div class="steps">
+        {%- for block in step_blocks -%}
+          <div class="step" {{ block.shopify_attributes }}>
+            <span class="step-num">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</span>
+            <div><h3>{{ block.settings.title }}</h3><p>{{ block.settings.text }}</p></div>
+          </div>
+        {%- endfor -%}
+      </div>
+    </section>
+  {%- endif -%}
+
+  {%- assign spec_blocks = section.blocks | where: "type", "spec" -%}
+  {%- if spec_blocks.size > 0 -%}
+    <section class="section">
+      {%- if section.settings.specs_eyebrow != blank -%}<p class="eyebrow">{{ section.settings.specs_eyebrow | escape }}</p>{%- endif -%}
+      {%- if section.settings.specs_heading != blank -%}<h2>{{ section.settings.specs_heading }}</h2>{%- endif -%}
+      <div class="materials-grid">
+        {%- for block in spec_blocks -%}
+          <div class="material-cell" {{ block.shopify_attributes }}>
+            <span class="m-label">{{ block.settings.label }}</span>
+            <span class="m-value">{{ block.settings.value }}</span>
+          </div>
+        {%- endfor -%}
+      </div>
+    </section>
+  {%- endif -%}
+
+  {%- assign compare_blocks = section.blocks | where: "type", "compare_row" -%}
+  {%- if compare_blocks.size > 0 -%}
+    <section class="section">
+      {%- if section.settings.compare_eyebrow != blank -%}<p class="eyebrow">{{ section.settings.compare_eyebrow | escape }}</p>{%- endif -%}
+      {%- if section.settings.compare_heading != blank -%}<h2>{{ section.settings.compare_heading }}</h2>{%- endif -%}
+      <div class="compare-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr><th>&nbsp;</th><th class="hl">{{ shop.name }}</th><th>{{ section.settings.compare_other_label | default: "Typical Poster" }}</th></tr>
+          </thead>
+          <tbody>
+            {%- for block in compare_blocks -%}
+              <tr {{ block.shopify_attributes }}>
+                <td class="row-label">{{ block.settings.label }}</td>
+                <td class="hl">{{ block.settings.ours }}</td>
+                <td>{{ block.settings.theirs }}</td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {%- endif -%}
+
+  {%- assign review_blocks = section.blocks | where: "type", "review" -%}
+  {%- if review_blocks.size > 0 -%}
+    <section class="section">
+      {%- if section.settings.reviews_eyebrow != blank -%}<p class="eyebrow">{{ section.settings.reviews_eyebrow | escape }}</p>{%- endif -%}
+      {%- if section.settings.reviews_heading != blank -%}<h2>{{ section.settings.reviews_heading }}</h2>{%- endif -%}
+      <div class="reviews-track">
+        {%- for block in review_blocks -%}
+          <div class="review-card" {{ block.shopify_attributes }}>
+            <span class="r-stars">{% for i in (1..block.settings.stars) %}★{% endfor %}</span>
+            <p>&ldquo;{{ block.settings.quote }}&rdquo;</p>
+            <span class="r-name">— {{ block.settings.name }}</span>
+          </div>
+        {%- endfor -%}
+      </div>
+    </section>
+  {%- endif -%}
+
+  {%- assign faq_blocks = section.blocks | where: "type", "faq" -%}
+  {%- if faq_blocks.size > 0 -%}
+    <section class="section">
+      {%- if section.settings.faq_eyebrow != blank -%}<p class="eyebrow">{{ section.settings.faq_eyebrow | escape }}</p>{%- endif -%}
+      {%- if section.settings.faq_heading != blank -%}<h2>{{ section.settings.faq_heading }}</h2>{%- endif -%}
+      <div class="faq">
+        {%- for block in faq_blocks -%}
+          <details {{ block.shopify_attributes }}{% if forloop.first %} open{% endif %}>
+            <summary>{{ block.settings.question }}</summary>
+            <p>{{ block.settings.answer }}</p>
+          </details>
+        {%- endfor -%}
+      </div>
+    </section>
+  {%- endif -%}
+
+  {%- if section.settings.show_guarantee -%}
+    <section class="guarantee-banner">
+      <div class="g-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.5"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2>{{ section.settings.guarantee_heading | default: "Printed fresh, just for you" }}</h2>
+      <p>{{ section.settings.guarantee_text }}</p>
+      <a class="btn-add" href="#product-form-{{ section.id }}">{{ section.settings.guarantee_button_label | default: "Shop Now" }}</a>
+    </section>
+  {%- endif -%}
+
+</div>
+</div>
+</div>
+
+<script src="{{ 'warm-series-product.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Warm Series Product",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    { "type": "header", "content": "Gallery" },
+    {
+      "type": "paragraph",
+      "content": "Add one 'Print' block below per piece in the set, then assign its photo(s) in each block."
+    },
+    { "type": "checkbox", "id": "show_rig_note", "label": "Show swipe hint text", "default": true },
+    { "type": "text", "id": "rig_note", "label": "Swipe hint text", "default": "Swipe to see each print — tap a thumbnail to jump" },
+
+    { "type": "header", "content": "Buy box" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow text", "default": "The Full Set" },
+    { "type": "text", "id": "artist_line", "label": "Artist / origin line" },
+    { "type": "checkbox", "id": "buy_now_enabled", "label": "Show secondary Buy Now button", "default": true },
+    { "type": "text", "id": "buy_now_label", "label": "Buy Now button label", "default": "Buy Now" },
+
+    { "type": "header", "content": "Social proof" },
+    {
+      "type": "number",
+      "id": "happy_collectors_count",
+      "label": "Happy customers count (real number — leave 0 to hide)",
+      "info": "Only shows if greater than 0. Keep this accurate; do not use a made-up figure.",
+      "default": 0
+    },
+    { "type": "text", "id": "rating_value", "label": "Rating value shown", "default": "4.8" },
+    { "type": "text", "id": "rating_label", "label": "Rating line label", "default": "happy collectors" },
+
+    { "type": "header", "content": "Benefits section" },
+    { "type": "text", "id": "benefits_eyebrow", "label": "Eyebrow", "default": "Why This Piece" },
+    { "type": "text", "id": "benefits_heading", "label": "Heading", "default": "Made to be lived with" },
+
+    { "type": "header", "content": "Steps section" },
+    { "type": "text", "id": "steps_eyebrow", "label": "Eyebrow", "default": "From Studio to Wall" },
+    { "type": "text", "id": "steps_heading", "label": "Heading", "default": "How each piece is made" },
+
+    { "type": "header", "content": "Specs section" },
+    { "type": "text", "id": "specs_eyebrow", "label": "Eyebrow", "default": "The Specs" },
+    { "type": "text", "id": "specs_heading", "label": "Heading", "default": "What you're actually buying" },
+
+    { "type": "header", "content": "Comparison table" },
+    { "type": "text", "id": "compare_eyebrow", "label": "Eyebrow", "default": "The Honest Comparison" },
+    { "type": "text", "id": "compare_heading", "label": "Heading", "default": "Us vs. a mass-market print" },
+    { "type": "text", "id": "compare_other_label", "label": "Comparison column label", "default": "Typical Poster" },
+
+    { "type": "header", "content": "Reviews section" },
+    { "type": "text", "id": "reviews_eyebrow", "label": "Eyebrow", "default": "From Collectors" },
+    { "type": "text", "id": "reviews_heading", "label": "Heading", "default": "What people say after it's on the wall" },
+
+    { "type": "header", "content": "FAQ section" },
+    { "type": "text", "id": "faq_eyebrow", "label": "Eyebrow", "default": "Questions" },
+    { "type": "text", "id": "faq_heading", "label": "Heading", "default": "Before you buy" },
+
+    { "type": "header", "content": "Guarantee banner" },
+    { "type": "checkbox", "id": "show_guarantee", "label": "Show guarantee banner", "default": true },
+    { "type": "text", "id": "guarantee_heading", "label": "Heading", "default": "Printed fresh, just for you" },
+    { "type": "text", "id": "guarantee_text", "label": "Body text", "default": "Add your real return/refund policy here — don't leave a claim you can't back up." },
+    { "type": "text", "id": "guarantee_button_label", "label": "Button label", "default": "Shop Now" }
+  ],
+  "blocks": [
+    {
+      "type": "print",
+      "name": "Print in the set",
+      "settings": [
+        { "type": "text", "id": "name", "label": "Print name", "default": "Print" },
+        { "type": "image_picker", "id": "image_1", "label": "Photo 1 (shown full — the piece itself)" },
+        { "type": "text", "id": "caption_1", "label": "Caption for photo 1", "default": "Full piece" },
+        { "type": "image_picker", "id": "image_2", "label": "Photo 2 (optional)" },
+        { "type": "text", "id": "caption_2", "label": "Caption for photo 2", "default": "On the wall" },
+        { "type": "image_picker", "id": "image_3", "label": "Photo 3 (optional)" },
+        { "type": "text", "id": "caption_3", "label": "Caption for photo 3", "default": "Detail" }
+      ]
+    },
+    {
+      "type": "icon",
+      "name": "Trust icon",
+      "settings": [
+        { "type": "html", "id": "icon_svg", "label": "Icon SVG markup", "default": "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\"><path d=\"M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg>" },
+        { "type": "text", "id": "label", "label": "Label (use <br> for 2 lines)", "default": "Made<br>to Order" }
+      ]
+    },
+    {
+      "type": "benefit",
+      "name": "Benefit",
+      "settings": [
+        { "type": "html", "id": "icon_svg", "label": "Icon SVG markup", "default": "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\"><path d=\"M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg>" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Vivid, True Color" },
+        { "type": "textarea", "id": "text", "label": "Text" }
+      ]
+    },
+    {
+      "type": "step",
+      "name": "Process step",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Printed on demand" },
+        { "type": "textarea", "id": "text", "label": "Text" }
+      ]
+    },
+    {
+      "type": "spec",
+      "name": "Spec row",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Print type" },
+        { "type": "text", "id": "value", "label": "Value", "default": "Matte poster print" }
+      ]
+    },
+    {
+      "type": "compare_row",
+      "name": "Comparison row",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Row label", "default": "Print method" },
+        { "type": "text", "id": "ours", "label": "Our value", "default": "Thick 10.3mil matte, printed to order" },
+        { "type": "text", "id": "theirs", "label": "Their value", "default": "Thin mass-produced stock" }
+      ]
+    },
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        { "type": "range", "id": "stars", "label": "Stars", "min": 1, "max": 5, "default": 5 },
+        { "type": "textarea", "id": "quote", "label": "Quote" },
+        { "type": "text", "id": "name", "label": "Attribution", "default": "Verified collector" }
+      ]
+    },
+    {
+      "type": "faq",
+      "name": "FAQ item",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question" },
+        { "type": "textarea", "id": "answer", "label": "Answer" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Warm Series Product",
+      "blocks": [
+        { "type": "print", "settings": { "name": "Print 1" } },
+        { "type": "print", "settings": { "name": "Print 2" } },
+        { "type": "print", "settings": { "name": "Print 3" } },
+        { "type": "print", "settings": { "name": "Print 4" } },
+        { "type": "icon", "settings": { "label": "Made<br>to Order" } },
+        { "type": "icon", "settings": { "label": "Thick Matte<br>Paper" } },
+        { "type": "icon", "settings": { "label": "Vivid<br>Color Print" } },
+        { "type": "icon", "settings": { "label": "Ships in<br>2-5 Days" } },
+        { "type": "benefit", "settings": { "title": "Vivid, True Color", "text": "Printed with water-based inkjet at 104% ISO brightness on thick 10.3mil matte paper — sharp detail, no washed-out color." } },
+        { "type": "benefit", "settings": { "title": "Printed Fresh Per Order", "text": "Nothing sits in a warehouse — your set is printed specifically for you when you order." } },
+        { "type": "benefit", "settings": { "title": "Built to Match", "text": "Part of a multi-piece series designed in one palette, so it pairs with the rest of your home." } },
+        { "type": "benefit", "settings": { "title": "Easy Returns", "text": "Change your mind? Returns are accepted on unopened items — see our return policy for details." } },
+        { "type": "step", "settings": { "title": "Designed as a set", "text": "Each piece shares one palette and mood, so the four work together as one collection." } },
+        { "type": "step", "settings": { "title": "Printed on demand", "text": "Thick 10.3mil matte paper, water-based inkjet print, made fresh for your order." } },
+        { "type": "step", "settings": { "title": "Shipped to your door", "text": "Carefully packed and shipped directly once your order is printed." } },
+        { "type": "spec", "settings": { "label": "Print type", "value": "Matte poster print" } },
+        { "type": "spec", "settings": { "label": "Paper", "value": "10.3 mil enhanced matte, 104% ISO brightness" } },
+        { "type": "spec", "settings": { "label": "Ratio", "value": "4:3, all sizes" } },
+        { "type": "faq", "settings": { "question": "How do I know what size to pick?", "answer": "Each size shows exact centimeters in the selector above." } },
+        { "type": "faq", "settings": { "question": "Can I return it if I change my mind?", "answer": "See our return policy page for the current terms." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

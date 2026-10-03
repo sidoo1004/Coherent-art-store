@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coherent — Wandering Light</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a href="index.html" class="logo">Coherent<span>°</span></a>
+    <nav class="main-nav">
+      <a href="#">Collections</a>
+      <a href="#">Artists</a>
+      <a href="#">Viewing Room</a>
+    </nav>
+    <div class="header-icons">
+      <button class="icon-btn" aria-label="Search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Cart">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 4h2l2.4 12.4a2 2 0 002 1.6h8.4a2 2 0 002-1.6L21 8H6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1" fill="currentColor"/><circle cx="18" cy="21" r="1" fill="currentColor"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap product-page">
+
+  <nav class="breadcrumb">
+    <a href="#">Collections</a> <span>/</span> <a href="#">Warm Series</a> <span>/</span> <span class="current">Wandering Light</span>
+  </nav>
+
+  <section class="product-grid">
+
+    <!-- Artwork -->
+    <div class="gallery">
+      <div class="art-frame" id="artFrame">
+        <div class="art-canvas" id="artCanvas" style="background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20800%201000%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%232c3a26%27/%3E%3Cstop%20offset=%270.5%27%20stop-color=%27%23c9a15a%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%237a3d2a%27/%3E%3C/linearGradient%3E%3Cfilter%20id=%27n%27%20x=%27-20%25%27%20y=%27-20%25%27%20width=%27140%25%27%20height=%27140%25%27%3E%3CfeTurbulence%20type=%27fractalNoise%27%20baseFrequency=%270.010%200.016%27%20numOctaves=%274%27%20seed=%277%27%20result=%27noise%27/%3E%3CfeColorMatrix%20in=%27noise%27%20type=%27matrix%27%20values=%270%200%200%200%200.79%20%200%200%200%200%200.63%20%200%200%200%200%200.35%20%200%200%200%201%200%27/%3E%3C/filter%3E%3C/defs%3E%3Crect%20width=%27800%27%20height=%271000%27%20fill=%27url(%23g)%27/%3E%3Crect%20width=%27800%27%20height=%271000%27%20filter=%27url(%23n)%27%20opacity=%270.45%27/%3E%3C/svg%3E')"></div>
+        <div class="lens" id="lens" style="background-image:inherit"></div>
+        <span class="badge">Limited Edition</span>
+        <span class="frame-corner tl"></span>
+        <span class="frame-corner br"></span>
+        <span class="zoom-hint">Hover to inspect the surface</span>
+      </div>
+
+      <div class="filmstrip" id="filmstrip">
+        <button class="strip-item active" data-crop="0 0 800 1000" aria-label="Full view"></button>
+        <button class="strip-item" data-crop="0 0 400 500" aria-label="Detail, top left"></button>
+        <button class="strip-item" data-crop="400 0 400 500" aria-label="Detail, top right"></button>
+        <button class="strip-item" data-crop="0 500 400 500" aria-label="Detail, lower field"></button>
+        <button class="strip-item" data-crop="300 350 400 500" aria-label="Detail, center"></button>
+      </div>
+    </div>
+
+    <!-- Label / plaque -->
+    <div class="details">
+      <p class="eyebrow">Piece No. 07 — Edition of 50</p>
+      <h1>Wandering<em>Light</em></h1>
+      <p class="artist">Elena Marsh · Oaxaca, MX · 2025</p>
+
+      <div class="rating" aria-label="4.8 out of 5 stars">
+        <span class="stars">★★★★★</span>
+        <span class="rating-count">4.8 — 126 collectors</span>
+      </div>
+
+      <p class="description">
+        A quiet study in warm gradients and negative space, giclée-printed on
+        archival cotton rag. Each work is hand-numbered and signed on the
+        reverse — no two impressions from this run are struck the same day.
+      </p>
+
+      <div class="price-row">
+        <span class="price" id="price">$185</span>
+        <span class="price-compare">$230</span>
+        <span class="price-save">20% below list</span>
+      </div>
+
+      <div class="option-group">
+        <label class="option-label">Size</label>
+        <div class="swatches" id="sizeOptions">
+          <button class="swatch" data-size="A3" data-price="145">
+            <span class="swatch-name">A3</span>
+            <span class="swatch-dim">30 × 42 cm</span>
+          </button>
+          <button class="swatch active" data-size="A2" data-price="185">
+            <span class="swatch-name">A2</span>
+            <span class="swatch-dim">42 × 59 cm</span>
+          </button>
+          <button class="swatch" data-size="A1" data-price="245">
+            <span class="swatch-name">A1</span>
+            <span class="swatch-dim">59 × 84 cm</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <label class="option-label">Frame</label>
+        <div class="material-swatches" id="frameOptions">
+          <button class="material active" data-frame="none" data-add="0">
+            <span class="material-chip chip-none"></span> Unframed
+          </button>
+          <button class="material" data-frame="oak" data-add="45">
+            <span class="material-chip chip-oak"></span> Oak
+          </button>
+          <button class="material" data-frame="black" data-add="45">
+            <span class="material-chip chip-black"></span> Matte Black
+          </button>
+        </div>
+      </div>
+
+      <div class="buy-row">
+        <div class="qty-stepper">
+          <button id="qtyMinus" aria-label="Decrease quantity">−</button>
+          <span id="qtyValue">1</span>
+          <button id="qtyPlus" aria-label="Increase quantity">+</button>
+        </div>
+        <button class="btn-primary" id="addToCart">Add to Cart — <span id="totalPrice">$185</span></button>
+      </div>
+
+      <button class="btn-secondary" id="buyNow">Reserve This Piece</button>
+
+      <dl class="certificate">
+        <div><dt>Medium</dt><dd>Archival pigment print</dd></div>
+        <div><dt>Paper</dt><dd>310gsm cotton rag</dd></div>
+        <div><dt>Provenance</dt><dd>Studio-verified, numbered</dd></div>
+        <div><dt>Ships from</dt><dd>Oaxaca, MX — in 2–3 days</dd></div>
+      </dl>
+
+      <div class="accordion">
+        <details>
+          <summary>Materials &amp; Care</summary>
+          <p>Printed on 100% cotton rag using pigment-based giclée inks, fade-resistant beyond 100 years. Keep out of direct sunlight; dust gently with a dry, soft cloth.</p>
+        </details>
+        <details>
+          <summary>Shipping &amp; Returns</summary>
+          <p>Unframed work ships rolled in a rigid tube; framed work ships flat in a padded case. Returns accepted within 30 days in original condition.</p>
+        </details>
+        <details>
+          <summary>Artist Note</summary>
+          <p>"Wandering Light explores the moment just before dusk, when color still holds its warmth." — Elena Marsh</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- In the room -->
+  <section class="room-section">
+    <div class="room-copy">
+      <p class="eyebrow">Scale &amp; Context</p>
+      <h2>See it on your wall</h2>
+      <p>At A2, Wandering Light holds a stairwell landing or a reading-chair corner without asking for more furniture around it. Framed in oak, it warms a room already leaning cool.</p>
+    </div>
+    <div class="room-scene">
+      <div class="room-wall">
+        <div class="room-frame">
+          <div class="room-art" style="background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20800%201000%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g2%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%232c3a26%27/%3E%3Cstop%20offset=%270.5%27%20stop-color=%27%23c9a15a%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%237a3d2a%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27800%27%20height=%271000%27%20fill=%27url(%23g2)%27/%3E%3C/svg%3E')"></div>
+        </div>
+        <div class="room-console"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="related">
+    <h2>From the same collection</h2>
+    <div class="related-grid">
+      <article class="related-card tall">
+        <span class="ph" style="background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20500%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27h%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%231f2e2c%27/%3E%3Cstop%20offset=%270.55%27%20stop-color=%27%236f8f83%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23c7d6c9%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27800%27%20height=%271000%27%20fill=%27url(%23h)%27/%3E%3C/svg%3E')"></span>
+        <div class="related-meta"><h3>Quiet Horizon</h3><p>$160</p></div>
+      </article>
+      <article class="related-card">
+        <span class="ph" style="background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20500%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27t%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%233a1f14%27/%3E%3Cstop%20offset=%270.5%27%20stop-color=%27%23b5622f%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23e3b389%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27800%27%20height=%271000%27%20fill=%27url(%23t)%27/%3E%3C/svg%3E')"></span>
+        <div class="related-meta"><h3>Terracotta Field</h3><p>$175</p></div>
+      </article>
+      <article class="related-card">
+        <span class="ph" style="background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20500%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27s%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%232a2a26%27/%3E%3Cstop%20offset=%270.5%27%20stop-color=%27%238a8578%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23e5ded1%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27800%27%20height=%271000%27%20fill=%27url(%23s)%27/%3E%3C/svg%3E')"></span>
+        <div class="related-meta"><h3>Soft Static</h3><p>$150</p></div>
+      </article>
+      <article class="related-card tall">
+        <span class="ph" style="background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20500%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27l%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%230f1c22%27/%3E%3Cstop%20offset=%270.5%27%20stop-color=%27%23356672%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23a9c9c9%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27800%27%20height=%271000%27%20fill=%27url(%23l)%27/%3E%3C/svg%3E')"></span>
+        <div class="related-meta"><h3>Low Tide</h3><p>$195</p></div>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span class="logo small">Coherent<span>°</span></span>
+    <p>© 2026 Coherent Art Store — editions printed and shipped from Oaxaca, MX.</p>
+  </div>
+</footer>
+
+<div class="sticky-bar" id="stickyBar">
+  <span id="stickyTitle">Wandering Light — A2</span>
+  <button class="btn-primary" id="stickyAdd">Add to Cart — <span id="stickyPrice">$185</span></button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
