@@ -1,0 +1,572 @@
+{%- liquid
+  assign set_product = closest.product
+  assign pieces = set_product.metafields.custom.set_pieces.value
+  assign first_piece = pieces | first
+  assign tier_2 = block.settings.tier_2 | default: 0
+  assign tier_3 = block.settings.tier_3 | default: 0
+  assign tier_4 = block.settings.tier_4 | default: 0
+-%}
+
+{%- if set_product == blank or pieces == blank or first_piece == blank -%}
+  {%- if request.design_mode -%}
+    <div class="set-picker set-picker--empty" {{ block.shopify_attributes }}>
+      Set picker: add the pieces of this set in the product's <strong>Set pieces</strong> field.
+    </div>
+  {%- endif -%}
+{%- else -%}
+  <set-picker
+    class="set-picker"
+    data-set-title="{{ set_product.title | escape }}"
+    data-set-id="{{ set_product.id }}"
+    {{ block.shopify_attributes }}
+  >
+    <script type="application/json" data-set-picker-config>
+      {
+        "moneyFormat": {{ shop.money_format | json }},
+        "tiers": { "2": {{ tier_2 | json }}, "3": {{ tier_3 | json }}, "4": {{ tier_4 | json }} },
+        "optionNames": {{ first_piece.options | json }},
+        "pieces": [
+          {%- for piece in pieces -%}
+            {
+              "label": {{ 'Piece ' | append: forloop.index | json }},
+              "title": {{ piece.title | json }},
+              "variants": [
+                {%- for variant in piece.variants -%}
+                  {
+                    "id": {{ variant.id }},
+                    "options": {{ variant.options | json }},
+                    "price": {{ variant.price }},
+                    "available": {{ variant.available | json }}
+                  }{%- unless forloop.last -%},{%- endunless -%}
+                {%- endfor -%}
+              ]
+            }{%- unless forloop.last -%},{%- endunless -%}
+          {%- endfor -%}
+        ]
+      }
+    </script>
+
+    <fieldset class="set-picker__group">
+      <legend class="set-picker__legend">{{ block.settings.pieces_heading | escape }}</legend>
+      <div class="set-picker__pieces">
+        {%- for piece in pieces -%}
+          <label class="set-picker__piece">
+            <input
+              type="checkbox"
+              class="set-picker__checkbox"
+              data-piece-index="{{ forloop.index0 }}"
+              {% if block.settings.all_selected %}checked{% endif %}
+            >
+            <span class="set-picker__piece-label">Piece {{ forloop.index }}</span>
+          </label>
+        {%- endfor -%}
+      </div>
+    </fieldset>
+
+    {%- for option in first_piece.options_with_values -%}
+      {%- assign option_index = forloop.index0 -%}
+      <fieldset class="set-picker__group">
+        <legend class="set-picker__legend">
+          {{ option.name | escape }}
+          {%- if forloop.first and pieces.size > 1 %} <span class="set-picker__hint">(same for all pieces)</span>{% endif -%}
+        </legend>
+        <div class="set-picker__options">
+          {%- for value in option.values -%}
+            {%- liquid
+              if option_index == 0
+                assign is_default = forloop.last
+              else
+                assign is_default = forloop.first
+              endif
+            -%}
+            <label class="set-picker__option">
+              <input
+                type="radio"
+                name="set-picker-{{ block.id }}-option-{{ option_index }}"
+                value="{{ value | escape }}"
+                data-option-index="{{ option_index }}"
+                {% if is_default %}checked{% endif %}
+              >
+              <span>{{ value | escape }}</span>
+            </label>
+          {%- endfor -%}
+        </div>
+      </fieldset>
+    {%- endfor -%}
+
+    <div class="set-picker__summary" aria-live="polite">
+      <div class="set-picker__row">
+        <span data-set-picker-count></span>
+        <span data-set-picker-subtotal></span>
+      </div>
+      <div class="set-picker__row set-picker__row--discount" data-set-picker-discount-row hidden>
+        <span data-set-picker-discount-label></span>
+        <span data-set-picker-discount></span>
+      </div>
+      <div class="set-picker__row set-picker__row--total">
+        <span>Total</span>
+        <span>
+          <s class="set-picker__compare" data-set-picker-compare hidden></s>
+          <strong data-set-picker-total></strong>
+        </span>
+      </div>
+      {%- if block.settings.tiers_note != blank -%}
+        <p class="set-picker__note">{{ block.settings.tiers_note | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <button type="button" class="button set-picker__add" data-set-picker-add>
+      {{ block.settings.button_label | escape }}
+    </button>
+    <p class="set-picker__error" data-set-picker-error hidden></p>
+  </set-picker>
+
+  {% raw %}
+  <script type="module">
+    import { CartLinesUpdateEvent, CartErrorEvent } from '@shopify/events';
+
+    class SetPicker extends HTMLElement {
+      connectedCallback() {
+        if (this.config) return;
+        this.config = JSON.parse(this.querySelector('[data-set-picker-config]').textContent);
+        this.addEventListener('change', this.onChange);
+        this.querySelector('[data-set-picker-add]').addEventListener('click', this.onAdd);
+        this.update();
+      }
+
+      get checkboxes() {
+        return [...this.querySelectorAll('.set-picker__checkbox')];
+      }
+
+      get selectedOptions() {
+        const values = [];
+        this.querySelectorAll('input[type="radio"][data-option-index]:checked').forEach((input) => {
+          values[Number(input.dataset.optionIndex)] = input.value;
+        });
+        return values;
+      }
+
+      /** Variants of the ticked pieces that match the chosen size/options. */
+      getSelection() {
+        const options = this.selectedOptions;
+        return this.checkboxes
+          .filter((box) => box.checked)
+          .map((box) => {
+            const index = Number(box.dataset.pieceIndex);
+            const piece = this.config.pieces[index];
+            const variant = piece.variants.find((v) => options.every((value, i) => v.options[i] === value));
+            return { index, piece, variant };
+          });
+      }
+
+      discountFor(count) {
+        const tiers = this.config.tiers;
+        const eligible = Object.keys(tiers)
+          .map(Number)
+          .filter((min) => count >= min && Number(tiers[min]) > 0)
+          .sort((a, b) => b - a);
+        return eligible.length ? Number(tiers[eligible[0]]) : 0;
+      }
+
+      formatMoney(cents) {
+        const format = this.config.moneyFormat || '${{amount}}';
+        const withDelimiters = (number, decimals, thousands, decimal) => {
+          const [whole, fraction] = (number / 100).toFixed(decimals).split('.');
+          const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, thousands);
+          return fraction ? grouped + decimal + fraction : grouped;
+        };
+        return format.replace(/\{\{\s*(\w+)\s*\}\}/, (_, key) => {
+          switch (key) {
+            case 'amount_no_decimals':
+              return withDelimiters(cents, 0, ',', '.');
+            case 'amount_with_comma_separator':
+              return withDelimiters(cents, 2, '.', ',');
+            case 'amount_no_decimals_with_comma_separator':
+              return withDelimiters(cents, 0, '.', ',');
+            default:
+              return withDelimiters(cents, 2, ',', '.');
+          }
+        });
+      }
+
+      onChange = (event) => {
+        const target = event.target;
+        if (target.classList?.contains('set-picker__checkbox')) {
+          this.showPieceMedia(Number(target.dataset.pieceIndex));
+        }
+        this.update();
+      };
+
+      update() {
+        const selection = this.getSelection();
+        const count = selection.length;
+        const unavailable = selection.some(({ variant }) => !variant || !variant.available);
+        const subtotal = selection.reduce((sum, { variant }) => sum + (variant ? variant.price : 0), 0);
+        const percent = this.discountFor(count);
+        const discount = Math.round((subtotal * percent) / 100);
+        const total = subtotal - discount;
+
+        this.querySelector('[data-set-picker-count]').textContent =
+          count === 1 ? '1 piece' : `${count} pieces`;
+        this.querySelector('[data-set-picker-subtotal]').textContent = this.formatMoney(subtotal);
+
+        const discountRow = this.querySelector('[data-set-picker-discount-row]');
+        discountRow.hidden = percent === 0;
+        this.querySelector('[data-set-picker-discount-label]').textContent = `Set discount (−${percent}%)`;
+        this.querySelector('[data-set-picker-discount]').textContent = `−${this.formatMoney(discount)}`;
+
+        const compare = this.querySelector('[data-set-picker-compare]');
+        compare.hidden = percent === 0;
+        compare.textContent = this.formatMoney(subtotal);
+        this.querySelector('[data-set-picker-total]').textContent = this.formatMoney(total);
+
+        const button = this.querySelector('[data-set-picker-add]');
+        button.disabled = count === 0 || unavailable;
+        this.setError(unavailable ? 'This size is currently unavailable for one of the selected pieces.' : '');
+      }
+
+      /** Brings the gallery image of the given piece into view (Piece 1 = image 1, …). */
+      showPieceMedia(index) {
+        const section = this.closest('.shopify-section') || document;
+        const gallery = section.querySelector('media-gallery');
+        if (!gallery) return;
+
+        const slideshow = gallery.querySelector('slideshow-component');
+        const slideshowVisible = slideshow && slideshow.getClientRects().length > 0;
+
+        if (slideshowVisible && typeof slideshow.select === 'function') {
+          const rect = slideshow.getBoundingClientRect();
+          if (rect.bottom < 0 || rect.top > window.innerHeight) {
+            slideshow.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          slideshow.select(index);
+          return;
+        }
+
+        const items = gallery.querySelectorAll('.media-gallery__grid > li');
+        const item = items[index];
+        if (!item) return;
+        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        item.classList.remove('set-picker-highlight');
+        void item.offsetWidth;
+        item.classList.add('set-picker-highlight');
+      }
+
+      setError(message) {
+        const error = this.querySelector('[data-set-picker-error]');
+        error.textContent = message;
+        error.hidden = !message;
+      }
+
+      onAdd = async () => {
+        const selection = this.getSelection().filter(({ variant }) => variant);
+        if (!selection.length) return;
+
+        const button = this.querySelector('[data-set-picker-add]');
+        button.disabled = true;
+        this.setError('');
+
+        const sectionIds = [...document.querySelectorAll('cart-items-component')]
+          .map((element) => element.dataset.sectionId)
+          .filter(Boolean);
+
+        const items = selection.map(({ piece, variant }) => ({
+          id: variant.id,
+          quantity: 1,
+          properties: {
+            Set: this.dataset.setTitle,
+            Piece: piece.label,
+            _set_id: this.dataset.setId,
+          },
+        }));
+
+        const deferred = CartLinesUpdateEvent.createPromise();
+        this.dispatchEvent(
+          new CartLinesUpdateEvent({
+            action: 'add',
+            context: 'product',
+            lines: items.map((item) => ({ merchandiseId: String(item.id), quantity: 1 })),
+            promise: deferred.promise,
+          })
+        );
+
+        try {
+          const response = await fetch(Theme.routes.cart_add_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ items, sections: sectionIds.join(',') }),
+          }).then((res) => res.json());
+
+          if (response.status) {
+            this.setError(response.description || response.message || 'Could not add the set to your cart.');
+            this.dispatchEvent(new CartErrorEvent({ error: response.message || 'Add to cart failed', code: 'INVALID' }));
+          }
+
+          const cartItems = document.querySelector('cart-items-component');
+          const cart = cartItems
+            ? await customElements.whenDefined('cart-items-component').then(() => cartItems.fetchCartData())
+            : await fetch(`${Theme.routes.cart_url}.json`, { headers: { Accept: 'application/json' } }).then((res) => res.json());
+
+          deferred.resolve({
+            cart: CartLinesUpdateEvent.createCartFromAjaxResponse(cart),
+            detail: {
+              items: cart.items,
+              source: 'set-picker',
+              sourceId: this.dataset.setId,
+              itemCount: items.length,
+              sections: response.sections,
+              didError: Boolean(response.status),
+            },
+          });
+
+          if (!response.status && !cartItems) {
+            window.location.href = Theme.routes.cart_url;
+          }
+        } catch (error) {
+          console.error(error);
+          deferred.reject(error);
+          this.setError('Something went wrong. Please try again.');
+        } finally {
+          this.update();
+        }
+      };
+    }
+
+    if (!customElements.get('set-picker')) customElements.define('set-picker', SetPicker);
+  </script>
+  {% endraw %}
+{%- endif -%}
+
+{% stylesheet %}
+  .set-picker {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-lg, 20px);
+    width: 100%;
+  }
+
+  .set-picker--empty {
+    padding: 12px;
+    border: 1px dashed currentcolor;
+    opacity: 0.7;
+  }
+
+  .set-picker__group {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .set-picker__legend {
+    padding: 0;
+    margin-block-end: 10px;
+    font-weight: 500;
+  }
+
+  .set-picker__hint {
+    font-weight: 400;
+    opacity: 0.7;
+  }
+
+  .set-picker__pieces,
+  .set-picker__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .set-picker__piece,
+  .set-picker__option {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .set-picker__piece {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1px solid color-mix(in srgb, var(--color-foreground) 25%, transparent);
+    border-radius: var(--style-border-radius-inputs, 0);
+  }
+
+  .set-picker__piece:has(input:checked) {
+    border-color: var(--color-foreground);
+  }
+
+  .set-picker__checkbox {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--color-foreground);
+    cursor: pointer;
+  }
+
+  .set-picker__option input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .set-picker__option span {
+    display: inline-block;
+    padding: 10px 16px;
+    border: 1px solid color-mix(in srgb, var(--color-foreground) 25%, transparent);
+    border-radius: var(--style-border-radius-inputs, 0);
+  }
+
+  .set-picker__option input:checked + span {
+    background: var(--color-foreground);
+    color: var(--color-background);
+    border-color: var(--color-foreground);
+  }
+
+  .set-picker__option input:focus-visible + span,
+  .set-picker__checkbox:focus-visible {
+    outline: 2px solid currentcolor;
+    outline-offset: 2px;
+  }
+
+  .set-picker__summary {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-block: 12px;
+    border-block: 1px solid color-mix(in srgb, var(--color-foreground) 15%, transparent);
+  }
+
+  .set-picker__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .set-picker__row[hidden] {
+    display: none;
+  }
+
+  .set-picker__row--total {
+    font-size: 1.15em;
+  }
+
+  .set-picker__compare {
+    opacity: 0.55;
+    margin-inline-end: 6px;
+    font-weight: 400;
+  }
+
+  .set-picker__note {
+    margin: 0;
+    font-size: 0.85em;
+    opacity: 0.7;
+  }
+
+  .set-picker__add {
+    width: 100%;
+  }
+
+  .set-picker__add:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .set-picker__error {
+    margin: 0;
+    color: #c81e1e;
+  }
+
+  .media-gallery__grid > li.set-picker-highlight {
+    animation: set-picker-highlight 1.4s ease-out;
+  }
+
+  @keyframes set-picker-highlight {
+    0%,
+    40% {
+      outline: 3px solid var(--color-foreground);
+      outline-offset: -3px;
+    }
+
+    100% {
+      outline: 3px solid transparent;
+      outline-offset: -3px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Set picker",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows a checkbox for each product in the product's 'Set pieces' field. Piece 1 matches image 1, Piece 2 matches image 2, and so on."
+    },
+    {
+      "type": "text",
+      "id": "pieces_heading",
+      "label": "Pieces heading",
+      "default": "Choose your pieces"
+    },
+    {
+      "type": "checkbox",
+      "id": "all_selected",
+      "label": "All pieces selected by default",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Set discount (must match your automatic discounts)"
+    },
+    {
+      "type": "range",
+      "id": "tier_2",
+      "label": "2 pieces (%)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "%",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "tier_3",
+      "label": "3 pieces (%)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "%",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "tier_4",
+      "label": "4+ pieces (%)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "%",
+      "default": 25
+    },
+    {
+      "type": "text",
+      "id": "tiers_note",
+      "label": "Note under the total",
+      "default": "Set discount is applied automatically at checkout."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Add set to cart"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Set picker"
+    }
+  ]
+}
+{% endschema %}
