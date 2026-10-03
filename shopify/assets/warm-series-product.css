@@ -20,8 +20,13 @@
 .ws-root * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 .ws-root a { color: inherit; text-decoration: none; }
 
+/* Layout: stacked on mobile, gallery sits in its own column on desktop */
+.ws-root .ws-layout { display: block; }
+.ws-root .ws-gallery-col { display: block; }
+.ws-root .ws-content-col { display: block; }
+
 /* Gallery — 4 horizontal bands, each swiped independently */
-.ws-root .hero-gallery { height: 100dvh; max-height: 760px; min-height: 380px; display: flex; flex-direction: column; position: relative; }
+.ws-root .hero-gallery { height: 85dvh; max-height: 620px; min-height: 340px; display: flex; flex-direction: column; position: relative; }
 .ws-root .rig-note {
   position: absolute; top: 0; left: 0; right: 0; z-index: 5; text-align: center;
   font-family: var(--mono); font-size: 10px; letter-spacing: 0.2px; color: var(--muted);
@@ -33,13 +38,12 @@
 .ws-root .band:last-child { border-bottom: none; }
 .ws-root .band-track { height: 100%; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; }
 .ws-root .band-track::-webkit-scrollbar { display: none; }
-.ws-root .slide { flex: 0 0 100%; height: 100%; scroll-snap-align: start; position: relative; display: block; }
-.ws-root .slide-bg { width: 100%; height: 100%; background-size: cover; background-position: center; background-repeat: no-repeat; }
+.ws-root .slide { flex: 0 0 100%; height: 100%; scroll-snap-align: start; position: relative; display: block; background: var(--panel); }
+.ws-root .slide-bg { width: 100%; height: 100%; background-size: contain; background-position: center; background-repeat: no-repeat; }
 .ws-root .slide.full-art { display: flex; align-items: center; justify-content: center; background: var(--panel); }
 .ws-root .slide.full-art .art-box {
-  height: 100%; max-height: 100%; aspect-ratio: 4/3; max-width: 100%; width: 100%;
-  background-size: cover; background-position: center; background-repeat: no-repeat;
-  box-shadow: 0 0 0 1px var(--line-strong);
+  height: 100%; max-height: 100%; max-width: 100%; width: 100%;
+  background-size: contain; background-position: center; background-repeat: no-repeat;
 }
 .ws-root .placeholder-art { background: repeating-linear-gradient(45deg, rgba(244,241,232,0.04), rgba(244,241,232,0.04) 8px, transparent 8px, transparent 16px); }
 .ws-root .slide-label {
@@ -178,4 +182,17 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .ws-root * { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+}
+
+/* Desktop: gallery sits in its own column beside the content, instead of full-bleed across the screen */
+@media (min-width: 960px) {
+  .ws-root .ws-layout {
+    display: grid;
+    grid-template-columns: minmax(380px, 46%) 1fr;
+    align-items: start;
+    gap: 0;
+  }
+  .ws-root .ws-gallery-col { position: sticky; top: 0; }
+  .ws-root .hero-gallery { height: 100vh; max-height: 880px; }
+  .ws-root .ws-content-col { padding-left: 8px; }
 }

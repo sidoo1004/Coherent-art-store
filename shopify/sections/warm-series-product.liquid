@@ -14,6 +14,8 @@
 {%- assign print_blocks = section.blocks | where: "type", "print" -%}
 
 <div class="ws-root" id="ws-root-{{ section.id }}">
+<div class="ws-layout">
+<div class="ws-gallery-col">
 
   <section class="hero-gallery" aria-label="The prints in this set">
     {%- if section.settings.show_rig_note -%}
@@ -94,6 +96,9 @@
 
     </div>
   </section>
+
+</div>
+<div class="ws-content-col">
 
   <div class="buybox">
     {%- if section.settings.eyebrow != blank -%}<p class="eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
@@ -296,6 +301,8 @@
     </section>
   {%- endif -%}
 
+</div>
+</div>
 </div>
 
 <script src="{{ 'warm-series-product.js' | asset_url }}" defer></script>
