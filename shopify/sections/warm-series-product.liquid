@@ -1,10 +1,9 @@
 {%- comment -%}
-  Coherent — Warm Series product section
+  Coherent product section — the product itself is a matched set of prints.
   Online Store 2.0 section. Add to a Product template via
   Online Store > Themes > Customize > Product page > Add section > Warm Series Product.
-  Needs: a collection containing the pieces in the set (including this product),
-  variant options named e.g. "Size" and "Frame" with real prices per combination,
-  and image alt text per photo if you want custom captions (falls back to generic ones).
+  Needs: one "Print" block per piece in the set, each with its own photo(s) picked
+  in the theme editor, and variant options (e.g. "Size" / "Frame") with real prices.
 {%- endcomment -%}
 
 {# If these fonts are already loaded sitewide in theme.liquid, remove this line to avoid loading them twice. #}
@@ -12,65 +11,68 @@
 {{ 'warm-series-product.css' | asset_url | stylesheet_tag }}
 
 {%- assign current_variant = product.selected_or_first_available_variant -%}
-{%- assign set_products = collections[section.settings.set_collection].products -%}
+{%- assign print_blocks = section.blocks | where: "type", "print" -%}
 
 <div class="ws-root" id="ws-root-{{ section.id }}">
 
-  <section class="hero-gallery" aria-label="The set this piece belongs to">
+  <section class="hero-gallery" aria-label="The prints in this set">
     {%- if section.settings.show_rig_note -%}
-      <div class="rig-note">{{ section.settings.rig_note | default: "Each row is one piece in the set — swipe a row for its other photos" | escape }}</div>
+      <div class="rig-note">{{ section.settings.rig_note | default: "Each row is one print in the set — swipe a row for its other photos" | escape }}</div>
     {%- endif -%}
     <div class="band-stack">
 
-      {%- comment -%} Current product's own row always shown first {%- endcomment -%}
-      <div class="band">
-        <span class="piece-tag"><span class="name">{{ product.title }}</span><span class="price">{{ current_variant.price | money_without_trailing_zeros }}</span></span>
-        <div class="band-track" id="track-{{ section.id }}-0">
-          {%- for image in product.images limit: 3 -%}
-            <div class="slide{% if forloop.first %} full-art{% endif %}">
-              {%- if forloop.first -%}
-                <div class="art-box" style="background-image:url('{{ image | image_url: width: 1600 }}')"></div>
-              {%- else -%}
-                <div class="slide-bg" style="background-image:url('{{ image | image_url: width: 1600 }}')"></div>
+      {%- for block in print_blocks -%}
+        {%- assign band_index = forloop.index0 -%}
+        <div class="band" {{ block.shopify_attributes }}>
+          <span class="piece-tag"><span class="name">{{ block.settings.name | default: "Print " | append: forloop.index }}</span></span>
+          <div class="band-track" id="track-{{ section.id }}-{{ band_index }}">
+            {%- assign has_any_image = false -%}
+            {%- for i in (1..3) -%}
+              {%- assign img_key = "image_" | append: i -%}
+              {%- assign cap_key = "caption_" | append: i -%}
+              {%- assign block_image = block.settings[img_key] -%}
+              {%- if block_image -%}
+                {%- assign has_any_image = true -%}
+                <div class="slide{% if forloop.first %} full-art{% endif %}">
+                  {%- if forloop.first -%}
+                    <div class="art-box" style="background-image:url('{{ block_image | image_url: width: 1600 }}')"></div>
+                  {%- else -%}
+                    <div class="slide-bg" style="background-image:url('{{ block_image | image_url: width: 1600 }}')"></div>
+                  {%- endif -%}
+                  <span class="slide-label">{{ block.settings[cap_key] | default: "Photo " | append: i }}</span>
+                </div>
               {%- endif -%}
-              <span class="slide-label">{{ image.alt | default: "Photo " | append: forloop.index }}</span>
-            </div>
-          {%- else -%}
-            <div class="slide full-art">
-              <div class="art-box placeholder-art"></div>
-              <span class="slide-label">Add product photos</span>
-            </div>
-          {%- endfor -%}
+            {%- endfor -%}
+            {%- unless has_any_image -%}
+              <div class="slide full-art">
+                <div class="art-box placeholder-art"></div>
+                <span class="slide-label">Add a photo for {{ block.settings.name | default: "this print" }}</span>
+              </div>
+            {%- endunless -%}
+          </div>
+          <div class="band-dots" data-for="track-{{ section.id }}-{{ band_index }}"></div>
         </div>
-        <div class="band-dots" data-for="track-{{ section.id }}-0"></div>
-      </div>
-
-      {%- comment -%} Other pieces in the set, pulled from the chosen collection {%- endcomment -%}
-      {%- assign other_count = 0 -%}
-      {%- for other in set_products -%}
-        {%- if other.id == product.id -%}{%- continue -%}{%- endif -%}
-        {%- if other_count >= 3 -%}{%- break -%}{%- endif -%}
-        {%- assign other_count = other_count | plus: 1 -%}
+      {%- else -%}
         <div class="band">
-          <span class="piece-tag"><a class="name" href="{{ other.url }}">{{ other.title }}</a><span class="price">{{ other.price_min | money_without_trailing_zeros }}</span></span>
-          <div class="band-track" id="track-{{ section.id }}-{{ other_count }}">
-            {%- for image in other.images limit: 3 -%}
-              <a class="slide{% if forloop.first %} full-art{% endif %}" href="{{ other.url }}">
+          <span class="piece-tag"><span class="name">{{ product.title }}</span></span>
+          <div class="band-track" id="track-{{ section.id }}-0">
+            {%- for image in product.images limit: 4 -%}
+              <div class="slide{% if forloop.first %} full-art{% endif %}">
                 {%- if forloop.first -%}
                   <div class="art-box" style="background-image:url('{{ image | image_url: width: 1600 }}')"></div>
                 {%- else -%}
                   <div class="slide-bg" style="background-image:url('{{ image | image_url: width: 1600 }}')"></div>
                 {%- endif -%}
                 <span class="slide-label">{{ image.alt | default: "Photo " | append: forloop.index }}</span>
-              </a>
+              </div>
             {%- else -%}
-              <a class="slide full-art" href="{{ other.url }}">
+              <div class="slide full-art">
                 <div class="art-box placeholder-art"></div>
-                <span class="slide-label">{{ other.title }}</span>
-              </a>
+                <span class="slide-label">Add a "Print" block for each piece in the set</span>
+              </div>
             {%- endfor -%}
           </div>
-          <div class="band-dots" data-for="track-{{ section.id }}-{{ other_count }}"></div>
+          <div class="band-dots" data-for="track-{{ section.id }}-0"></div>
         </div>
       {%- endfor -%}
 
@@ -234,33 +236,6 @@
     </section>
   {%- endif -%}
 
-  {%- if section.settings.show_bundle -%}
-    <section class="section">
-      <div class="usp-callout">
-        {%- if section.settings.bundle_eyebrow != blank -%}<p class="usp-eyebrow">{{ section.settings.bundle_eyebrow | escape }}</p>{%- endif -%}
-        {%- if section.settings.bundle_heading != blank -%}<h3>{{ section.settings.bundle_heading }}</h3>{%- endif -%}
-        {%- if section.settings.bundle_text != blank -%}<p>{{ section.settings.bundle_text }}</p>{%- endif -%}
-        <div class="usp-price-row">
-          {%- assign bundle_product = section.settings.bundle_product -%}
-          <div>
-            {%- if bundle_product -%}
-              <span class="usp-amount">{{ bundle_product.price | money_without_trailing_zeros }}</span>
-              {%- if bundle_product.compare_at_price > bundle_product.price -%}
-                <span class="usp-compare">{{ bundle_product.compare_at_price | money_without_trailing_zeros }} separately</span>
-              {%- endif -%}
-            {%- else -%}
-              <span class="usp-amount">{{ section.settings.bundle_price | default: "—" }}</span>
-              <span class="usp-compare">{{ section.settings.bundle_compare }}</span>
-            {%- endif -%}
-          </div>
-          <a class="btn-add" href="{% if bundle_product %}{{ bundle_product.url }}{% else %}{{ collections[section.settings.set_collection].url }}{% endif %}">
-            {{ section.settings.bundle_button_label | default: "Get the Full Series" }}
-          </a>
-        </div>
-      </div>
-    </section>
-  {%- endif -%}
-
   {%- assign review_blocks = section.blocks | where: "type", "review" -%}
   {%- if review_blocks.size > 0 -%}
     <section class="section">
@@ -317,9 +292,12 @@
   },
   "settings": [
     { "type": "header", "content": "Gallery" },
-    { "type": "collection", "id": "set_collection", "label": "Collection for the set gallery (include this product + up to 3 others)" },
+    {
+      "type": "paragraph",
+      "content": "Add one 'Print' block below per piece in the set, then assign its photo(s) in each block."
+    },
     { "type": "checkbox", "id": "show_rig_note", "label": "Show swipe hint text", "default": true },
-    { "type": "text", "id": "rig_note", "label": "Swipe hint text", "default": "Each row is one piece in the set — swipe a row for its other photos" },
+    { "type": "text", "id": "rig_note", "label": "Swipe hint text", "default": "Each row is one print in the set — swipe a row for its other photos" },
 
     { "type": "header", "content": "Buy box" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow text", "default": "Limited Edition" },
@@ -355,21 +333,6 @@
     { "type": "text", "id": "compare_heading", "label": "Heading", "default": "Us vs. a mass-market print" },
     { "type": "text", "id": "compare_other_label", "label": "Comparison column label", "default": "Typical Poster" },
 
-    { "type": "header", "content": "Bundle callout" },
-    { "type": "checkbox", "id": "show_bundle", "label": "Show bundle callout", "default": true },
-    { "type": "text", "id": "bundle_eyebrow", "label": "Eyebrow", "default": "The Whole Point" },
-    { "type": "text", "id": "bundle_heading", "label": "Heading", "default": "Buy once. Decorate everywhere." },
-    { "type": "richtext", "id": "bundle_text", "label": "Body text" },
-    {
-      "type": "product",
-      "id": "bundle_product",
-      "label": "Bundle product (preferred — pulls real price)",
-      "info": "If set, its price/compare-at price are shown. Otherwise use the manual fields below."
-    },
-    { "type": "text", "id": "bundle_price", "label": "Manual bundle price (fallback)" },
-    { "type": "text", "id": "bundle_compare", "label": "Manual bundle compare text (fallback)" },
-    { "type": "text", "id": "bundle_button_label", "label": "Button label", "default": "Get the Full Series" },
-
     { "type": "header", "content": "Reviews section" },
     { "type": "text", "id": "reviews_eyebrow", "label": "Eyebrow", "default": "From Collectors" },
     { "type": "text", "id": "reviews_heading", "label": "Heading", "default": "What people say after it's on the wall" },
@@ -385,6 +348,19 @@
     { "type": "text", "id": "guarantee_button_label", "label": "Button label", "default": "Shop Now" }
   ],
   "blocks": [
+    {
+      "type": "print",
+      "name": "Print in the set",
+      "settings": [
+        { "type": "text", "id": "name", "label": "Print name", "default": "Print" },
+        { "type": "image_picker", "id": "image_1", "label": "Photo 1 (shown full — the piece itself)" },
+        { "type": "text", "id": "caption_1", "label": "Caption for photo 1", "default": "Full piece" },
+        { "type": "image_picker", "id": "image_2", "label": "Photo 2 (optional)" },
+        { "type": "text", "id": "caption_2", "label": "Caption for photo 2", "default": "On the wall" },
+        { "type": "image_picker", "id": "image_3", "label": "Photo 3 (optional)" },
+        { "type": "text", "id": "caption_3", "label": "Caption for photo 3", "default": "Detail" }
+      ]
+    },
     {
       "type": "icon",
       "name": "Trust icon",
@@ -449,6 +425,10 @@
     {
       "name": "Warm Series Product",
       "blocks": [
+        { "type": "print", "settings": { "name": "Print 1" } },
+        { "type": "print", "settings": { "name": "Print 2" } },
+        { "type": "print", "settings": { "name": "Print 3" } },
+        { "type": "print", "settings": { "name": "Print 4" } },
         { "type": "icon", "settings": { "label": "30-Day<br>Guarantee" } },
         { "type": "icon", "settings": { "label": "Free Ship<br>Over $150" } },
         { "type": "icon", "settings": { "label": "Cotton<br>Rag 310g" } },

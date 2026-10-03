@@ -1,8 +1,9 @@
 # Warm Series Product — Shopify section
 
 This is the Coherent art-store product page design, rebuilt as a real Shopify
-Online Store 2.0 section. It uses your actual product/variant/collection data
-instead of the hardcoded mockup content — nothing here is faked.
+Online Store 2.0 section. Each **product is one set** (e.g. "Minimalist |
+Seasons Concept") made of several matching prints — the section's gallery
+shows one row per print in that set, not one row per separate product.
 
 ## Files
 
@@ -12,25 +13,28 @@ instead of the hardcoded mockup content — nothing here is faked.
 
 ## 1. Set up your product in Shopify admin first
 
-The design depends on a few things existing on the product:
-
 - **Variant options**: create two options, e.g. "Size" (S / M / L) and "Frame"
   (No Frame / Premium), with **real prices set per combination** in Shopify
   admin. The page reads `variant.price` directly — there's no "+$45" markup
   math happening in the template, so set each variant's actual price.
-- **Images**: upload real 4:3 photos. Optionally set each image's **alt text**
-  to a caption (e.g. "On the wall", "Surface detail") — the gallery uses alt
-  text as the slide label, falling back to "Photo 1/2/3" if left blank.
 - **Compare-at price** (optional): set this on a variant if you want the
   struck-through price + "X% below list" badge to show.
 
-## 2. Create a collection for "the set"
+## 2. Add a "Print" block for each piece in the set
 
-The top gallery shows this product's own row first, then up to 3 more rows
-pulled live from a collection you choose (e.g. a "Warm Series" collection
-containing all 4 pieces). Each other product's title, price, and first 3
-images are pulled automatically — add/remove pieces from the collection and
-the gallery updates on its own.
+The gallery is driven by blocks, not by a collection — because the set
+*is* the product. In the theme editor, add one **Print** block per piece
+(e.g. "Wandering Light", "Quiet Horizon", "Terracotta Field", "Low Tide")
+and, in each block, pick that print's photo(s):
+
+- **Photo 1** (required) — the full piece, shown straight-on. All prints are
+  4:3 landscape, so upload true 4:3 photos for a clean fit.
+- **Photo 2 / Photo 3** (optional) — more angles of that same print (on the
+  wall, a texture/detail shot). Leave blank until you have them; the row
+  just won't be swipeable yet.
+
+Reorder blocks in the theme editor to reorder the rows. No separate
+products or collection are needed for this gallery.
 
 ## 3. Install the files
 
@@ -47,17 +51,12 @@ In Shopify admin: **Online Store → Themes → your theme → Edit code**.
 Go to **Online Store → Themes → Customize**, open a product page, and under
 **Add section** pick **Warm Series Product**. From there:
 
-- Pick the **set collection** in the section settings.
+- Add a **Print** block per piece in the set and assign its photo(s) (see
+  step 2).
 - Add **blocks** for the trust icons, benefits, process steps, specs,
   comparison rows, reviews, and FAQ — a starter set is pre-filled via the
   section's preset, but you'll want to edit the copy to match your real
   materials/claims.
-- If you have a real bundle product (all 4 prints as one SKU), pick it under
-  **Bundle callout → Bundle product** so the real price shows. Otherwise it
-  falls back to a manual price field you type in, linking to the collection
-  page (true one-click multi-item bundle checkout needs Shopify's native
-  Bundles feature or a dedicated bundle SKU — plain Liquid can't fabricate
-  that part).
 
 ## Honesty flags — read before publishing
 
@@ -75,7 +74,7 @@ Go to **Online Store → Themes → Customize**, open a product page, and under
 ## What's different from the design mockup
 
 - The mockup's gallery images were AI-generated placeholder gradients; this
-  version uses your real product photos.
+  version uses your real product photos, picked per print via blocks.
 - Sizes, prices, and the frame option are real Shopify variants now, not
   hardcoded JS state — switching options updates price via the actual
   variant data and adds the correct variant ID to cart.
@@ -83,7 +82,6 @@ Go to **Online Store → Themes → Customize**, open a product page, and under
 
 ## Before going live
 
-This has not been tested against a live Shopify store (no store was
-connected in the session that built it). Install it on a **duplicate/preview
-theme** first, test the variant picker, add-to-cart, and buy-now flow with a
-real product, then publish.
+Install it on a **duplicate/preview theme** first (already done — see
+"Coherent — Warm Series (preview)" in your theme list), test the variant
+picker, add-to-cart, and buy-now flow with a real product, then publish.
