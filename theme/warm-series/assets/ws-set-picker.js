@@ -119,7 +119,10 @@
       }
       if (nextPct > 0) {
         var more = nextCount - count;
-        meterHint.textContent = 'Add ' + more + ' more for −' + nextPct + '%';
+        meterHint.textContent = 'Add ' + more + ' more for ';
+        var strong = document.createElement('em');
+        strong.textContent = '\u2212' + nextPct + '%';
+        meterHint.appendChild(strong);
       } else if (pct > 0) {
         meterHint.textContent = 'Full set · best price';
       } else {
