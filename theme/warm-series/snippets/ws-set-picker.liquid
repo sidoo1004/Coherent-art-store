@@ -44,6 +44,21 @@
     </div>
   </div>
 
+  <div class="ws-meter" aria-live="polite">
+    <div class="ws-meter-head">
+      <span class="ws-meter-hint"></span>
+      <span class="ws-meter-value"></span>
+    </div>
+    <div class="ws-meter-track">
+      <div class="ws-meter-fill"></div>
+      {%- for piece in pieces -%}
+        {%- unless forloop.last -%}
+          <span class="ws-meter-tick" style="left: {{ forloop.index | times: 100.0 | divided_by: pieces.size }}%"></span>
+        {%- endunless -%}
+      {%- endfor -%}
+    </div>
+  </div>
+
   {%- for option in first_piece.options_with_values -%}
     {%- assign option_index = forloop.index0 -%}
     <div class="variant-group">
@@ -64,21 +79,6 @@
       </div>
     </div>
   {%- endfor -%}
-
-  <div class="ws-meter" aria-live="polite">
-    <div class="ws-meter-head">
-      <span class="ws-meter-hint"></span>
-      <span class="ws-meter-value"></span>
-    </div>
-    <div class="ws-meter-track">
-      <div class="ws-meter-fill"></div>
-      {%- for piece in pieces -%}
-        {%- unless forloop.last -%}
-          <span class="ws-meter-tick" style="left: {{ forloop.index | times: 100.0 | divided_by: pieces.size }}%"></span>
-        {%- endunless -%}
-      {%- endfor -%}
-    </div>
-  </div>
 
   <div class="price-buy-row">
     <div class="price-stack">
@@ -106,7 +106,7 @@
   .ws-set .ws-set-count { display: block; font-size: 12px; opacity: 0.7; margin-top: 4px; }
   .ws-set .ws-set-error { margin: 10px 0 0; color: #e57373; font-size: 13px; }
   .ws-set .btn-add[disabled] { opacity: 0.5; cursor: not-allowed; }
-  .ws-set .ws-meter { margin: 4px 0 24px; }
+  .ws-set .ws-meter { margin: -4px 0 24px; }
   .ws-set .ws-meter-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; min-height: 26px; margin-bottom: 8px; }
   .ws-set .ws-meter-hint { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.65; }
   .ws-set .ws-meter-value { font-family: 'Fraunces', serif; font-size: 26px; line-height: 1; font-weight: 600; color: #c4a46a; display: inline-block; }
