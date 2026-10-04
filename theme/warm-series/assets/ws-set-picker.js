@@ -43,7 +43,7 @@
     var buyBtn = el.querySelector('.ws-set-buy');
     var errorEl = el.querySelector('.ws-set-error');
     var meterFill = el.querySelector('.ws-meter-fill');
-    var meterValue = el.querySelector('.ws-meter-value');
+    var meterTiers = el.querySelector('.ws-meter-tiers');
     var meterHint = el.querySelector('.ws-meter-hint');
 
     function selectedOptions() {
@@ -96,24 +96,44 @@
       setError(unavailable ? 'This size is unavailable for one of the selected pieces.' : '');
     }
 
-    // Savings meter: a thin line that fills per piece, with the unlocked discount shown large.
-    var lastPct = null;
+    // Savings meter: one segment per discount tier (2nd, 3rd, 4th piece...). The bar stays empty
+    // with one piece, then fills one segment per added piece; tier labels sit at each segment end,
+    // faded until reached, and the current tier pops.
+    var segments = Math.max(pieceButtons.length - 1, 0);
+    var tierLabels = [];
+    for (var k = 1; k <= segments; k++) {
+      var tierPct = discountFor(config.tiers, k + 1);
+      var label = document.createElement('span');
+      label.className = 'ws-meter-tier';
+      label.style.left = (k / segments) * 100 + '%';
+      label.textContent = tierPct > 0 ? '\u2212' + tierPct + '%' : '';
+      if (meterTiers) meterTiers.appendChild(label);
+      tierLabels.push(label);
+    }
+    var lastCount = null;
+
     function renderMeter(count, pct) {
       if (!meterFill) return;
-      var totalPieces = pieceButtons.length;
-      meterFill.style.width = (totalPieces ? (count / totalPieces) * 100 : 0) + '%';
+      var filled = Math.max(count - 1, 0);
+      meterFill.style.width = (segments ? (Math.min(filled, segments) / segments) * 100 : 0) + '%';
 
-      meterValue.textContent = pct > 0 ? '−' + pct + '%' : '';
-      if (lastPct !== null && pct !== lastPct && pct > 0) {
-        meterValue.classList.remove('pop');
-        void meterValue.offsetWidth;
-        meterValue.classList.add('pop');
-      }
-      lastPct = pct;
+      tierLabels.forEach(function (label, i) {
+        var tierCount = i + 2;
+        var reached = count >= tierCount;
+        var current = reached && (count === tierCount || (i === tierLabels.length - 1 && count > tierCount));
+        label.classList.toggle('reached', reached);
+        label.classList.toggle('current', current);
+        if (current && lastCount !== null && count !== lastCount && count > lastCount) {
+          label.classList.remove('pop');
+          void label.offsetWidth;
+          label.classList.add('pop');
+        }
+      });
+      lastCount = count;
 
       var nextPct = 0;
       var nextCount = count;
-      for (var n = count + 1; n <= totalPieces; n++) {
+      for (var n = count + 1; n <= pieceButtons.length; n++) {
         var candidate = discountFor(config.tiers, n);
         if (candidate > pct) { nextPct = candidate; nextCount = n; break; }
       }
@@ -124,7 +144,7 @@
         strong.textContent = '\u2212' + nextPct + '%';
         meterHint.appendChild(strong);
       } else if (pct > 0) {
-        meterHint.textContent = 'Full set · best price';
+        meterHint.textContent = 'Full set \u00b7 best price';
       } else {
         meterHint.textContent = 'Set savings';
       }
