@@ -45,7 +45,6 @@
     var meterFill = el.querySelector('.ws-meter-fill');
     var meterValue = el.querySelector('.ws-meter-value');
     var meterHint = el.querySelector('.ws-meter-hint');
-    var meterSteps = Array.prototype.slice.call(el.querySelectorAll('.ws-meter-step'));
 
     function selectedOptions() {
       var values = [];
@@ -97,15 +96,20 @@
       setError(unavailable ? 'This size is unavailable for one of the selected pieces.' : '');
     }
 
-    // Savings meter: fills as pieces are added and says what the next piece unlocks.
+    // Savings meter: a thin line that fills per piece, with the unlocked discount shown large.
+    var lastPct = null;
     function renderMeter(count, pct) {
       if (!meterFill) return;
       var totalPieces = pieceButtons.length;
       meterFill.style.width = (totalPieces ? (count / totalPieces) * 100 : 0) + '%';
-      meterSteps.forEach(function (step) {
-        step.classList.toggle('reached', Number(step.dataset.step) <= count);
-      });
-      meterValue.textContent = pct > 0 ? pct + '% off unlocked' : 'No discount yet';
+
+      meterValue.textContent = pct > 0 ? '−' + pct + '%' : '';
+      if (lastPct !== null && pct !== lastPct && pct > 0) {
+        meterValue.classList.remove('pop');
+        void meterValue.offsetWidth;
+        meterValue.classList.add('pop');
+      }
+      lastPct = pct;
 
       var nextPct = 0;
       var nextCount = count;
@@ -115,11 +119,11 @@
       }
       if (nextPct > 0) {
         var more = nextCount - count;
-        meterHint.textContent = 'Add ' + more + ' more piece' + (more === 1 ? '' : 's') + ' to save ' + nextPct + '%.';
-      } else if (count === totalPieces && pct > 0) {
-        meterHint.textContent = 'Full set selected — best price unlocked.';
+        meterHint.textContent = 'Add ' + more + ' more for −' + nextPct + '%';
+      } else if (pct > 0) {
+        meterHint.textContent = 'Full set · best price';
       } else {
-        meterHint.textContent = '';
+        meterHint.textContent = 'Set savings';
       }
     }
 

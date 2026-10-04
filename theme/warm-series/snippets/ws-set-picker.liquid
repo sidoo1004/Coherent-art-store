@@ -67,26 +67,17 @@
 
   <div class="ws-meter" aria-live="polite">
     <div class="ws-meter-head">
-      <span class="ws-meter-label">Set savings</span>
+      <span class="ws-meter-hint"></span>
       <span class="ws-meter-value"></span>
     </div>
-    <div class="ws-meter-track"><div class="ws-meter-fill"></div></div>
-    <div class="ws-meter-steps">
+    <div class="ws-meter-track">
+      <div class="ws-meter-fill"></div>
       {%- for piece in pieces -%}
-        {%- liquid
-          assign step_pct = 0
-          if forloop.index >= 4
-            assign step_pct = tier_4
-          elsif forloop.index == 3
-            assign step_pct = tier_3
-          elsif forloop.index == 2
-            assign step_pct = tier_2
-          endif
-        -%}
-        <span class="ws-meter-step" data-step="{{ forloop.index }}">{{ forloop.index }}{% if step_pct > 0 %} · −{{ step_pct }}%{% endif %}</span>
+        {%- unless forloop.last -%}
+          <span class="ws-meter-tick" style="left: {{ forloop.index | times: 100.0 | divided_by: pieces.size }}%"></span>
+        {%- endunless -%}
       {%- endfor -%}
     </div>
-    <p class="ws-meter-hint"></p>
   </div>
 
   <div class="price-buy-row">
@@ -115,15 +106,14 @@
   .ws-set .ws-set-count { display: block; font-size: 12px; opacity: 0.7; margin-top: 4px; }
   .ws-set .ws-set-error { margin: 10px 0 0; color: #e57373; font-size: 13px; }
   .ws-set .btn-add[disabled] { opacity: 0.5; cursor: not-allowed; }
-  .ws-set .ws-meter { margin: 6px 0 22px; padding: 14px 16px; border: 1px solid rgba(196, 164, 106, 0.35); background: rgba(196, 164, 106, 0.05); }
-  .ws-set .ws-meter-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
-  .ws-set .ws-meter-label { opacity: 0.7; }
-  .ws-set .ws-meter-value { color: #c4a46a; font-weight: 500; }
-  .ws-set .ws-meter-track { position: relative; height: 6px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
-  .ws-set .ws-meter-fill { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg, #8f7647, #c4a46a); transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
-  .ws-set .ws-meter-steps { display: flex; justify-content: space-between; margin-top: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; }
-  .ws-set .ws-meter-step { opacity: 0.4; transition: opacity 0.3s, color 0.3s; }
-  .ws-set .ws-meter-step.reached { opacity: 1; color: #c4a46a; }
-  .ws-set .ws-meter-hint { margin: 10px 0 0; font-size: 12px; opacity: 0.75; }
-  @media (prefers-reduced-motion: reduce) { .ws-set .ws-meter-fill { transition: none; } }
+  .ws-set .ws-meter { margin: 4px 0 24px; }
+  .ws-set .ws-meter-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; min-height: 26px; margin-bottom: 8px; }
+  .ws-set .ws-meter-hint { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.65; }
+  .ws-set .ws-meter-value { font-family: 'Fraunces', serif; font-size: 26px; line-height: 1; font-weight: 600; color: #c4a46a; display: inline-block; }
+  .ws-set .ws-meter-value.pop { animation: ws-meter-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+  .ws-set .ws-meter-track { position: relative; height: 2px; background: rgba(255, 255, 255, 0.12); }
+  .ws-set .ws-meter-fill { position: absolute; inset: 0 auto 0 0; width: 0; background: #c4a46a; box-shadow: 0 0 8px rgba(196, 164, 106, 0.45); transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+  .ws-set .ws-meter-tick { position: absolute; top: -2px; width: 1px; height: 6px; background: rgba(255, 255, 255, 0.25); }
+  @keyframes ws-meter-pop { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) { .ws-set .ws-meter-fill { transition: none; } .ws-set .ws-meter-value.pop { animation: none; } }
 </style>
