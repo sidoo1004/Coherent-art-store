@@ -42,6 +42,10 @@
     var addPrice = el.querySelector('.ws-set-add-price');
     var buyBtn = el.querySelector('.ws-set-buy');
     var errorEl = el.querySelector('.ws-set-error');
+    var meterFill = el.querySelector('.ws-meter-fill');
+    var meterValue = el.querySelector('.ws-meter-value');
+    var meterHint = el.querySelector('.ws-meter-hint');
+    var meterSteps = Array.prototype.slice.call(el.querySelectorAll('.ws-meter-step'));
 
     function selectedOptions() {
       var values = [];
@@ -85,10 +89,38 @@
       saveEl.textContent = 'Set discount −' + pct + '%';
       countEl.textContent = count === 1 ? '1 piece' : count + ' pieces';
 
+      renderMeter(count, pct);
+
       var disabled = count === 0 || unavailable;
       addBtn.disabled = disabled;
       buyBtn.disabled = disabled;
       setError(unavailable ? 'This size is unavailable for one of the selected pieces.' : '');
+    }
+
+    // Savings meter: fills as pieces are added and says what the next piece unlocks.
+    function renderMeter(count, pct) {
+      if (!meterFill) return;
+      var totalPieces = pieceButtons.length;
+      meterFill.style.width = (totalPieces ? (count / totalPieces) * 100 : 0) + '%';
+      meterSteps.forEach(function (step) {
+        step.classList.toggle('reached', Number(step.dataset.step) <= count);
+      });
+      meterValue.textContent = pct > 0 ? pct + '% off unlocked' : 'No discount yet';
+
+      var nextPct = 0;
+      var nextCount = count;
+      for (var n = count + 1; n <= totalPieces; n++) {
+        var candidate = discountFor(config.tiers, n);
+        if (candidate > pct) { nextPct = candidate; nextCount = n; break; }
+      }
+      if (nextPct > 0) {
+        var more = nextCount - count;
+        meterHint.textContent = 'Add ' + more + ' more piece' + (more === 1 ? '' : 's') + ' to save ' + nextPct + '%.';
+      } else if (count === totalPieces && pct > 0) {
+        meterHint.textContent = 'Full set selected — best price unlocked.';
+      } else {
+        meterHint.textContent = '';
+      }
     }
 
     // Piece N shows Print N in the gallery, wherever the gallery was scrolled to.
