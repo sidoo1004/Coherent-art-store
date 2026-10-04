@@ -1,0 +1,94 @@
+{%- comment -%}
+  Set picker for the Warm Series product section.
+  Shows "Piece 1..N" toggles for the products in the set product's "Set pieces" metafield
+  (custom.set_pieces), one size choice for all pieces, and a live total with the set discount.
+  Piece N jumps the gallery to Print N. Pieces are added to the cart as separate items so
+  Printful fulfils each one.
+
+  @param product - the set product
+  @param section_id - id of the parent section (used for element ids)
+  @param tier_2 / tier_3 / tier_4 - set discount % for 2, 3, 4+ pieces (must match the automatic discounts)
+{%- endcomment -%}
+{%- assign pieces = product.metafields.custom.set_pieces.value -%}
+{%- assign first_piece = pieces | first -%}
+
+<div class="ws-set" id="ws-set-{{ section_id }}" data-section-id="{{ section_id }}" data-set-title="{{ product.title | escape }}" data-set-id="{{ product.id }}">
+  <script type="application/json" class="ws-set-config">
+    {
+      "moneyFormat": {{ shop.money_format | json }},
+      "tiers": { "2": {{ tier_2 | default: 0 | json }}, "3": {{ tier_3 | default: 0 | json }}, "4": {{ tier_4 | default: 0 | json }} },
+      "pieces": [
+        {%- for piece in pieces -%}
+          {
+            "label": {{ 'Piece ' | append: forloop.index | json }},
+            "variants": [
+              {%- for variant in piece.variants -%}
+                { "id": {{ variant.id }}, "options": {{ variant.options | json }}, "price": {{ variant.price }}, "available": {{ variant.available | json }} }{%- unless forloop.last -%},{%- endunless -%}
+              {%- endfor -%}
+            ]
+          }{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+
+  <div class="variant-group">
+    <span class="variant-label">Choose your pieces</span>
+    <div class="variant-row ws-set-pieces">
+      {%- for piece in pieces -%}
+        <button type="button" class="swatch active ws-piece" data-piece-index="{{ forloop.index0 }}" aria-pressed="true">
+          <span class="ws-check" aria-hidden="true"></span>
+          <span class="s-name">Piece {{ forloop.index }}</span>
+        </button>
+      {%- endfor -%}
+    </div>
+  </div>
+
+  {%- for option in first_piece.options_with_values -%}
+    {%- assign option_index = forloop.index0 -%}
+    <div class="variant-group">
+      <span class="variant-label">{{ option.name }}{% if forloop.first and pieces.size > 1 %} <span class="ws-set-hint">· same for all pieces</span>{% endif %}</span>
+      <div class="variant-row ws-set-option" data-option-index="{{ option_index }}">
+        {%- for value in option.values -%}
+          {%- liquid
+            if option_index == 0
+              assign is_default = forloop.last
+            else
+              assign is_default = forloop.first
+            endif
+          -%}
+          <button type="button" class="swatch{% if is_default %} active{% endif %}" data-value="{{ value | escape }}">
+            <span class="s-name">{{ value }}</span>
+          </button>
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endfor -%}
+
+  <div class="price-buy-row">
+    <div class="price-stack">
+      <span class="amount ws-set-total"></span>
+      <span class="sub ws-set-sub" hidden>
+        <span class="compare ws-set-compare"></span>
+        <span class="save ws-set-save"></span>
+      </span>
+      <span class="ws-set-count"></span>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn-add ws-set-add"><span class="ws-set-add-label">Add set — </span><span class="ws-set-add-price"></span></button>
+      <button type="button" class="btn-reserve ws-set-buy">Buy Now</button>
+    </div>
+  </div>
+  <p class="ws-set-error" hidden></p>
+</div>
+
+<style>
+  .ws-set .ws-piece { display: inline-flex; align-items: center; gap: 8px; }
+  .ws-set .ws-check { width: 14px; height: 14px; border: 1px solid currentColor; display: inline-grid; place-items: center; flex: none; }
+  .ws-set .ws-piece.active .ws-check::after { content: '✓'; font-size: 11px; line-height: 1; }
+  .ws-set .ws-piece:not(.active) { opacity: 0.55; }
+  .ws-set .ws-set-hint { text-transform: none; letter-spacing: 0; opacity: 0.7; }
+  .ws-set .ws-set-count { display: block; font-size: 12px; opacity: 0.7; margin-top: 4px; }
+  .ws-set .ws-set-error { margin: 10px 0 0; color: #e57373; font-size: 13px; }
+  .ws-set .btn-add[disabled] { opacity: 0.5; cursor: not-allowed; }
+</style>

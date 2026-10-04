@@ -15,3 +15,10 @@ Data it relies on (product metafields):
 Discounts: three automatic discounts on the "Set pieces (hidden)" collection
 (products tagged `set-piece`): 2 items 6%, 3 items 15%, 4+ items 25%.
 Keep the percentages in the block settings in sync with those discounts.
+
+## Warm Series theme ("Coherent — Warm Series (preview)")
+
+The main product page design. `sections/warm-series-product.liquid` renders
+`snippets/ws-set-picker.liquid` (+ `assets/ws-set-picker.js`) instead of the normal buy box
+whenever the product's `custom.set_pieces` field is filled. Piece N jumps the gallery to Print N.
+Set discount % lives in the section settings ("Set discount").
