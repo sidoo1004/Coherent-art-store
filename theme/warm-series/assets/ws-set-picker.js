@@ -85,7 +85,7 @@
       addPrice.textContent = formatMoney(total, config.moneyFormat);
       subEl.hidden = pct === 0;
       compareEl.textContent = formatMoney(subtotal, config.moneyFormat);
-      saveEl.textContent = 'Set discount −' + pct + '%';
+      saveEl.textContent = 'You save ' + formatMoney(subtotal - total, config.moneyFormat);
       countEl.textContent = count === 1 ? '1 piece' : count + ' pieces';
 
       renderMeter(count, pct);
